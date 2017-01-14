@@ -10,6 +10,8 @@ Plug 'kana/vim-arpeggio'
 Plug 'easymotion/vim-easymotion', {'tag': '*' }
 Plug 'Shougo/deoplete.nvim', {  'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'kien/rainbow_parentheses.vim'
 " Plugin outside ~/.vim/plugged with post-update hook
 "Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
@@ -101,6 +103,10 @@ map <PageUp> <C-U>
 map <PageDown> <C-D>
 nnoremap <C-H> :<C-U>bp<CR>
 nnoremap <C-L> :<C-U>bn<CR>
+" Easier navigating quickfix
+nnoremap <C-n> :cnext<CR>
+nnoremap <C-m> :cprevious<CR>
+nnoremap <leader>a :cclose<CR>
 
 "Align by columns
 command Column %!column -t
@@ -109,10 +115,10 @@ command Column %!column -t
 call arpeggio#load()
 let g:arpeggio_timeoutlen=100
 " having colon is a pain in the arse for most ex commands so use semicolon
-nnoremap <Plug>(arpeggio-default:;) :
-vnoremap <Plug>(arpeggio-default:;) :
-nnoremap : ;            
-vnoremap : ;            
+nnoremap : ;
+vnoremap : ;
+nnoremap ; :
+vnoremap ; :
 Arpeggio inoremap df  <Esc>
 "Not really sure that this is necessary in
 "since i only go into visual to do specific things
@@ -130,6 +136,8 @@ Arpeggio nnoremap jk  <Cr>
 Arpeggio nmap lk 15k
 Arpeggio nmap ds 15j
 
+
+
 " Dont do this it causes a lot of issues as many keys have esc as part of their key codes
 "noremap <Esc> :wincmd w<CR>
 " Removing this and replacing with clearer commandss
@@ -145,13 +153,12 @@ Arpeggio nnoremap fl :wincmd l <CR>
 "nonrecursive mappings have no effect
 let g:EasyMotion_do_mapping = 0 " Disable default mappings
 " Set keys for easymotion to use for jump targets
-let g:EasyMotion_keys = 'abcdefghipqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789;,.§'
+let g:EasyMotion_keys = 'abcdefghipqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.§'
+let g:EasyMotion_smartcase = 1
 " we need to map s in this way to avoid a clash with ds
 nmap <Plug>(arpeggio-default:s) <Plug>(easymotion-s)
 "vmap <Plug>(arpeggio-default:s) <Plug>(easymotion-s)
 "Map bi directional line motion
-Arpeggio nmap ;l <Plug>(easymotion-bd-jk)
-Arpeggio vmap ;l <Plug>(easymotion-bd-jk)
 Arpeggio nmap fu <Plug>(easymotion-j)
 Arpeggio vmap fu <Plug>(easymotion-j)
 Arpeggio nmap fi <Plug>(easymotion-k)
@@ -200,15 +207,13 @@ nmap <Leader>x :<C-u>Explore<CR>
 "au FileType go nmap <F5> :%!goimports<CR>:%!gofmt<CR>
 " the <Leader> actually just resolves to the mapleader variable set earlier
 "
-let g:EasyMotion_smartcase = 1
-au FileType go nmap <Leader>d <Plug>(go-doc-browser)
+au FileType go nmap <Leader>d <Plug>(go-doc)
 au FileType go nmap <leader>s <Plug>(go-implements)
 au Filetype go nmap <leader>i <Plug>(go-info)
 au Filetype go nmap <leader>e <Plug>(go-rename)
 au Filetype go nmap <Leader>c <Plug>(go-referrers)
 au FileType go nmap <leader>o <Plug>(go-coverage)
-au FileType go nmap <Leader>gd <Plug>(go-doc)
-au FileType go nmap <Leader>gd <Plug>(go-doc)
+au FileType go nmap md <Plug>(go-def)
 au FileType go noremap <leader>b :w<bar>GoInstall <Cr>
 au FileType go noremap <leader>v :w<bar>GoVet <Cr>
 au FileType go noremap <Leader>r :w<bar>GoRun<CR>
@@ -300,3 +305,10 @@ let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
 "Neovim likes this here
 set spell spelllang=en_gb
+
+
+"Rainbow parenthesis
+au VimEnter * RainbowParenthesesToggle
+au Syntax * RainbowParenthesesLoadRound
+au Syntax * RainbowParenthesesLoadSquare
+au Syntax * RainbowParenthesesLoadBraces
