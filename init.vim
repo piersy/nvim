@@ -5,13 +5,14 @@ Plug 'tomasr/molokai'
 Plug 'SirVer/ultisnips' , {'tag': '*' }
 Plug 'scrooloose/nerdtree', {'tag': '*' } | Plug 'rking/ag.vim' | Plug 'taiansu/nerdtree-ag'
 Plug 'fatih/vim-go', {'tag': '*' }
-Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
+Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' , 'for' : 'go' }
 Plug 'kana/vim-arpeggio'
 Plug 'easymotion/vim-easymotion', {'tag': '*' }
 Plug 'Shougo/deoplete.nvim', {  'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'kien/rainbow_parentheses.vim'
+Plug 'Valloric/YouCompleteMe', { 'for' : ['c', 'cpp'] }
 " Plugin outside ~/.vim/plugged with post-update hook
 "Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
@@ -21,6 +22,9 @@ Plug 'kien/rainbow_parentheses.vim'
 " Add plugins to &runtimepath
 call plug#end()
 
+" better completion options for vim commands
+set wildmode=longest,list,full
+set wildmenu
 
 " To disable a plugin, add it's bundle name to the following list
 syntax on
@@ -147,6 +151,7 @@ Arpeggio nnoremap fk :wincmd k <CR>
 Arpeggio nnoremap fj :wincmd j <CR> 
 Arpeggio nnoremap fh :wincmd h <CR> 
 Arpeggio nnoremap fl :wincmd l <CR> 
+Arpeggio nnoremap fm :close <CR> 
 
 "Easymotion mappings
 "It seems that we need to use recursive mappins for easymotion commands
@@ -168,29 +173,6 @@ let g:EasyMotion_startofline = 0
 vmap s <Plug>(easymotion-s)
 "End
 "
-"Close easily
-autocmd BufEnter * call CloseVimWhenEditableFilesClosed()
-function! CloseVimWhenEditableFilesClosed()
-    "echom "BufEnterBegin"
-    let windows = winnr('$')
-    " more than just nerd tree and quickfix open so return
-    if windows > 2
-        return
-    endif
-    let i = 1
-    while i <= windows
-        "echom "". i .": buftype'". getbufvar(winbufnr(i), '&buftype')."'"
-        if getbufvar(winbufnr(i), '&buftype') == ''
-            "this is an editable buffer so return
-            "echom "BufEnterEnd"
-            return
-        endif
-        let i += 1
-    endwhile
-    "all buffers uneditable so close
-    "echom "BufEnterEnd"
-    qa
-endfunction
 
 " Open nerd tree if no file
 autocmd StdinReadPre * let s:std_in=1
@@ -312,3 +294,25 @@ au VimEnter * RainbowParenthesesToggle
 au Syntax * RainbowParenthesesLoadRound
 au Syntax * RainbowParenthesesLoadSquare
 au Syntax * RainbowParenthesesLoadBraces
+
+
+"ycm
+let g:ycm_filetype_whitelist = {
+			\ 'C' : 1,
+			\ 'c' : 1,
+			\ 'cpp' : 1,
+			\ 'c++' : 1,
+			\ 'cc' : 1,
+			\ 'cxx' : 1,
+			\ 'h' : 1,
+			\ 'hpp' : 1,
+			\}
+
+"au BufRead,BufNewFile *.c,*.cpp,*.h,*.hpp,*.h++ set filetype=c
+au FileType cpp nnoremap <Leader>d :<C-u>YcmCompleter GetDoc<CR>
+au FileType cpp nnoremap md :<C-u>YcmCompleter GoTo<CR>
+au FileType cpp nnoremap mh :<C-u>YcmCompleter GoToInclude<CR>
+au Filetype cpp nnoremap <leader>t :<C-u>YcmCompleter GetType<CR>
+
+
+
