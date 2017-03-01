@@ -8,7 +8,7 @@ Plug 'tomasr/molokai'
 Plug 'kana/vim-arpeggio'
 
 " Handle tags easily
-"Plug 'xolox/vim-easytags' | Plug 'xolox/vim-misc'
+Plug 'xolox/vim-easytags' | Plug 'xolox/vim-misc'
 
 " Find and open files easily.
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
@@ -148,26 +148,25 @@ Arpeggio tnoremap <C-k> <up>
 
 
 " make the jump to def (d for def) shortcut easier.
-nnoremap <buffer> <leader>d <C-]>
+"nnoremap <buffer> <leader>d <C-]>
 
 " make the return to start (r for return) shortcut easier.
-nnoremap <buffer> <leader>r <C-t>
+"nnoremap <buffer> <leader>r <C-t>
 
-" Rather than just using these mappings for help I want tomake them global
-" so that I can use them for browsing c and c++ code as well.
-" help mappings
-"augroup help_maps
-"	autocmd!
-"	autocmd filetype help call ConfigureHelp()
-"augroup END
-"
-"function! ConfigureHelp()
-"	" make the jump to def (d for def) shortcut easier.
-"	nnoremap <buffer> <leader>d <C-]>
-"
-"	" make the return to start (r for return) shortcut easier.
-"	nnoremap <buffer> <leader>r <C-t>
-"endfunction
+" help mappings have to be set here otherwise overwritten with more buffer
+" specific maps
+augroup help_maps
+	autocmd!
+	autocmd filetype help call ConfigureHelp()
+augroup END
+
+function! ConfigureHelp()
+	" make the jump to def (d for def) shortcut easier.
+	nnoremap <buffer> <leader>d <C-]>
+
+	" make the return to start (r for return) shortcut easier.
+	nnoremap <buffer> <leader>r <C-t>
+endfunction
 
 " netrw mappings, this needs to be updated for terminal use, Explore expects
 " the current file name to be a file, for terminals it is not a file name so
@@ -203,7 +202,12 @@ endfunction
 " autorecurse does as expected but really im using it as a workaraound for the 
 " failiure of "UpdateTags -R" to set the correct paths int the tags files.
 " see - https://github.com/xolox/vim-easytags/issues/45
-"let g:easytags_autorecurse = 1
+let g:easytags_autorecurse = 0
+" easytags is not intuitive this function works around its surprises
+function! UpdateTagsRecursive()
+	:execute ":UpdateTags -R --tag-relative " expand('%:p:h')
+endfunction
+
 
 " fzf buffer switching
 function! s:buflist()
@@ -256,6 +260,12 @@ function! ApplyYcmMaps()
 	" Allow easy navigation of error locations
 	nnoremap <buffer> <C-j> :<C-u>lnext<CR>
 	nnoremap <buffer> <C-k> :<C-u>lprevious<CR>
+
+	" make the jump to def (d for def) shortcut easier.
+	nnoremap <buffer> <leader>d <C-]>
+
+	" make the return to start (r for return) shortcut easier.
+	nnoremap <buffer> <leader>r <C-t>
 endfunction
 
 " fzf buffer switching
