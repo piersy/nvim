@@ -1,300 +1,228 @@
 call plug#begin()
+" Make sure you use single quotes.
 
-" Make sure you use single quotes
+" The best color scheme.
 Plug 'tomasr/molokai'
-Plug 'SirVer/ultisnips' , {'tag': '*' }
-Plug 'scrooloose/nerdtree', {'tag': '*' } | Plug 'rking/ag.vim' | Plug 'taiansu/nerdtree-ag'
-Plug 'fatih/vim-go', {'tag': '*' }
-Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' , 'for' : 'go' }
+
+" Map multiple simultaneous key presses.
 Plug 'kana/vim-arpeggio'
-Plug 'easymotion/vim-easymotion', {'tag': '*' }
-Plug 'Shougo/deoplete.nvim', {  'do': ':UpdateRemotePlugins' }
-Plug 'zchee/deoplete-go', { 'do': 'make'}
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'kien/rainbow_parentheses.vim'
+
+" Handle tags easily
+"Plug 'xolox/vim-easytags' | Plug 'xolox/vim-misc'
+
+" Find and open files easily.
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
+"Plug 'junegunn/fzf.vim'
+
+" Autocomplete and semantic highlighting for c and c++.
 Plug 'Valloric/YouCompleteMe', { 'for' : ['c', 'cpp'] }
-" Plugin outside ~/.vim/plugged with post-update hook
-"Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
-" Unmanaged plugin (manually installed and updated)
-"Plug '~/my-prototype-plugin'
-
-" Add plugins to &runtimepath
+Plug 'tpope/vim-surround'
+" Add plugins to &runtimepath.
 call plug#end()
+" Arpeggio needs to be loaded as the init.vim is parsed so that
+" it can be used for defining key mappings.
+call arpeggio#load()
 
-" better completion options for vim commands
-set wildmode=longest,list,full
-set wildmenu
+" Sets the molokai colorscheme without this line you get normal colors.
+colorscheme molokai
 
-" To disable a plugin, add it's bundle name to the following list
-syntax on
-filetype plugin indent on
+" Standard vim settings.
 
-" Set up shell indentation to not indent cases
-if !exists("b:sh_indent_options")
-  let b:sh_indent_options = {}
-endif
+" Permanently display line numbers at the side of the screen.
+set number
 
-let b:sh_indent_options['case-labels'] = 0
-
-if &term =~ '256color'
-  " disable Background Color Erase (BCE) so that color schemes
-  " render properly when inside 256-color tmux and GNU screen.
-  " see also http://snk.tuxfamily.org/log/vim-256color-bce.html
-  set t_ut=
-endif
-
-"This ensures that the contents of the clipboard are written to the system
-"clipboard on leaving vim
-autocmd VimLeave * call system("xsel -ib", getreg())
-"Disable swap files they are annoying
-set noswapfile
-"Enable backup - they are useful
-set backup
-au BufWritePre * let &bex = '-' . strftime("%Y%m%d-%H%M%S") . '.vimbackup'
-set backupdir=~/vimtmp,.
-
-
-"Alter help so that it opens in a full window
-command -nargs=1 -complete=help Help help <args> | only
-
-" Setup the following abbreviations to use this approac for reliability
-" :cabbrev e <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'E' : 'e')<CR>
-cabbrev he Help
-cabbrev hel Help
-cabbrev help Help
-set ruler              " show the cursor position all the time
-set number             " line numbers
-set relativenumber            " show relative numbers
-set showcmd
-set incsearch
-set hlsearch
-"Don't ask to save when changing buffers (i.e. when jumping to a type definition)
+" Don't ask to save when changing buffers (i.e. when jumping to a type definition).
 set hidden
-"Stops auto indentation when psting code but also breaks command mappings and
-"insert mappings - dont use it!i!!!!
-"set paste
-"This causes the vim yank/paste to use the X11 copy paste buffer
+
+" This causes the vim yank/paste to use the X11 copy paste buffer.
 set clipboard=unnamedplus
-"Set tabs to be tabs and set vim to add them automatically while inserting text
+
+" Set tabs to be represented by 4 spaces, the default is 8.
 set tabstop=4
-set shiftwidth=4
-set noexpandtab
-"this makes sure that there are x lines of context above/below point scrolled to
+
+" The shiftwidth controls the indent usded for autoindenting
+" setting it to 0 makes it follow the tabstop setting.
+set shiftwidth=0
+
+" This makes sure that there are x lines of context above/below point
+" scrolled to, it helps to keep your eyes more central on the screen.
 set scrolloff=8
 
-"statusline
-set laststatus=2        "always show the statusline
-set statusline=%F       "tail of the filename
-set statusline+=[%{strlen(&fenc)?&fenc:'none'}, "file encoding
-set statusline+=%{&ff}] "file format
-set statusline+=%h      "help file flag
-set statusline+=%m      "modified flag
-set statusline+=%r      "read only flag
-set statusline+=%y      "filetype
-set statusline+=%=      "left/right separator
-set statusline+=%c,     "cursor column
-set statusline+=%l/%L   "cursor line/total lines
-set statusline+=\ %P    "percent through file
 
-" This sets the textwidth automatically for markdown files (README.md)
-au BufRead,BufNewFile *.md setlocal textwidth=80
+" Standard vim key mappings.
 
-"Ensure quickfix always open at always bottom
-autocmd FileType qf wincmd J
-"pgup / pgdown move too far to track text easily but ctrl-d and ctrl-u are hard to reach and not comfy
-map <PageUp> <C-U>
-map <PageDown> <C-D>
-nnoremap <C-H> :<C-U>bp<CR>
-nnoremap <C-L> :<C-U>bn<CR>
-" Easier navigating quickfix
-nnoremap <C-n> :cnext<CR>
-nnoremap <C-m> :cprevious<CR>
-nnoremap <leader>a :cclose<CR>
-
-"Align by columns
-command Column %!column -t
-
-"load arpeggio
-call arpeggio#load()
-let g:arpeggio_timeoutlen=100
-" having colon is a pain in the arse for most ex commands so use semicolon
-nnoremap : ;
-vnoremap : ;
-nnoremap ; :
-vnoremap ; :
-Arpeggio inoremap df  <Esc>
-"Not really sure that this is necessary in
-"since i only go into visual to do specific things
-"and those thing end with a yank paste or insert which exits visual
-"Arpeggio vnoremap df  <Esc>
-Arpeggio cnoremap df  <C-c>
-Arpeggio inoremap DF  <Esc>
-"Arpeggio vnoremap DF  <Esc>
-Arpeggio cnoremap DF  <C-c>
-nnoremap <Plug>(arpeggio-default:d) d
-nnoremap <Plug>(arpeggio-default:f) f
-Arpeggio inoremap jk  <Cr>
-Arpeggio cnoremap jk  <Cr>
-Arpeggio nnoremap jk  <Cr>
-Arpeggio nmap lk 15k
-Arpeggio nmap ds 15j
+" go to beginning of line.
+noremap H 0
+" go to end of line not including carriage return.
+noremap L g_
 
 
+" pgup/pgdown move too far to track text easily but ctrl-d and
+" ctrl-u are hard to reach and not comfy. I tried mapping this
+" with arpeggio, but it turns out that trying to repeatedly press
+" two keys together, for example when scrolling down a large 
+" document is not very comfortable. Best to keep arpeggio mappings
+" for operations that are not repeated in quick succession.
+nnoremap <PageUp> <C-U>
+nnoremap <PageDown> <C-D>
+nnoremap K <C-U>
+nnoremap J <C-D>
 
-" Dont do this it causes a lot of issues as many keys have esc as part of their key codes
-"noremap <Esc> :wincmd w<CR>
-" Removing this and replacing with clearer commandss
-" Arpeggio nnoremap df :wincmd w <CR> 
-" Map the row above hjkl to window movement commands
+" Provide some easy buffer switching
+nnoremap <C-n> :bnext<CR>
+nnoremap <C-m> :bprevious<CR>
+
+" I dont ever place marks so I use 'm' as the leader.
+let mapleader = 'm'
+
+" Allow easy editing of init.vim file.
+nnoremap <leader>ve :vsplit $MYVIMRC<CR>
+" Allow easy sourcing of init.vim file.
+nnoremap <leader>vs :write $MYVIMRC<CR>:source $MYVIMRC<CR>
+
+" Allow easy window opening.
+nnoremap <leader>wh :Hexplore<CR>
+nnoremap <leader>wv :Vexplore<CR>
+
+" Allow easy zooming of current window.
+nnoremap <leader>z :call ZoomToggle()<CR>
+let g:zoomed_in = 0
+function! ZoomToggle()
+	if g:zoomed_in
+		let g:zoomed_in = 0
+		:execute ":normal! \<C-w>="
+	else
+		let g:zoomed_in = 1
+		:execute ":normal! \<C-w>|\<C-w>_"
+	endif
+endfunction
+" Allow easy terminal opening. In order to pass an expression to a command we
+" need to use :execute.
+nnoremap <leader>th :split<CR>:terminal<CR>
+nnoremap <leader>tv :vsplit<CR>:terminal<CR>
+
+nnoremap <leader>s :<C-u>write<CR>
+nnoremap <leader>c :<C-u>quit<CR>
+nnoremap <leader>C :<C-u>quit!<CR>
 Arpeggio nnoremap fk :wincmd k <CR> 
 Arpeggio nnoremap fj :wincmd j <CR> 
 Arpeggio nnoremap fh :wincmd h <CR> 
 Arpeggio nnoremap fl :wincmd l <CR> 
-Arpeggio nnoremap fm :close <CR> 
+" Arpeggio standard vim key mappings.
 
-"Easymotion mappings
-"It seems that we need to use recursive mappins for easymotion commands
-"nonrecursive mappings have no effect
-let g:EasyMotion_do_mapping = 0 " Disable default mappings
-" Set keys for easymotion to use for jump targets
-let g:EasyMotion_keys = 'abcdefghipqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.§'
-let g:EasyMotion_smartcase = 1
-" we need to map s in this way to avoid a clash with ds
-nmap <Plug>(arpeggio-default:s) <Plug>(easymotion-s)
-"vmap <Plug>(arpeggio-default:s) <Plug>(easymotion-s)
-"Map bi directional line motion
-Arpeggio nmap fu <Plug>(easymotion-j)
-Arpeggio vmap fu <Plug>(easymotion-j)
-Arpeggio nmap fi <Plug>(easymotion-k)
-Arpeggio vmap fi <Plug>(easymotion-k)
-" This means that easymotion jk will stay in current column
-let g:EasyMotion_startofline = 0
-vmap s <Plug>(easymotion-s)
-"End
+" Map df to esc - no brainer.
+Arpeggio inoremap df <esc>
+" Map df to the equivalent of escape for commandline.
+Arpeggio cnoremap df <C-c>
+" Make esc in normal mode clear highlighting.
+Arpeggio noremap <silent> df :<C-u>nohlsearch<CR><esc>
+" Map fn to equivalient of escape in terminal mode. We can't map df here
+" otherwise when we have vim inside a terminal in vim and we escape the df
+" would escape the terminal rather than be passed to the vim inside the
+" terminal. We alos add a search back to first line starting with a dollar
+" then remove search highlighting. This stops the cursor appearing at the
+" bottom when we escape.
+Arpeggio tnoremap fn <C-\><C-n>G?^\$<CR>:<C-u>nohlsearch<CR>
+
+" Remove the original esc key functionality.
+inoremap <esc> <NOP>
+cnoremap <esc> <NOP>
+noremap <esc> <NOP>
+
+" Map jk to <CR> for insert and commandline mode.
+Arpeggio inoremap jk <CR>
+Arpeggio cnoremap jk <CR>
+
+" As with esc we have to map fj instead of jk so that when using vim inside a
+" terminal in vim we do not trigger the <CR>  of the terminal.
+Arpeggio tnoremap fj <CR>
+
+" Remove the original <CR> key functionality.
+inoremap <CR> <NOP>
+cnoremap <CR> <NOP>
+tnoremap <CR> <NOP>
+
+Arpeggio tnoremap <C-j> <down> 
+Arpeggio tnoremap <C-k> <up> 
+
+
+" make the jump to def (d for def) shortcut easier.
+nnoremap <buffer> <leader>d <C-]>
+
+" make the return to start (r for return) shortcut easier.
+nnoremap <buffer> <leader>r <C-t>
+
+" Rather than just using these mappings for help I want tomake them global
+" so that I can use them for browsing c and c++ code as well.
+" help mappings
+"augroup help_maps
+"	autocmd!
+"	autocmd filetype help call ConfigureHelp()
+"augroup END
 "
-
-" Open nerd tree if no file
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-noremap <F5> :NERDTreeToggle<CR>
-noremap <F6> :NERDTreeFind<CR>
-
-
-"Got to set this leader before trying to reference <Leader> anywhere
-let mapleader = "," 
-nmap <Leader>x :<C-u>Explore<CR>
-" Golang
-" for filetypes matching go set these commands
-"au FileType go nmap <F5> :%!goimports<CR>:%!gofmt<CR>
-" the <Leader> actually just resolves to the mapleader variable set earlier
+"function! ConfigureHelp()
+"	" make the jump to def (d for def) shortcut easier.
+"	nnoremap <buffer> <leader>d <C-]>
 "
-au FileType go nmap <Leader>d <Plug>(go-doc)
-au FileType go nmap <leader>s <Plug>(go-implements)
-au Filetype go nmap <leader>i <Plug>(go-info)
-au Filetype go nmap <leader>e <Plug>(go-rename)
-au Filetype go nmap <Leader>c <Plug>(go-referrers)
-au FileType go nmap <leader>o <Plug>(go-coverage)
-au FileType go nmap md <Plug>(go-def)
-au FileType go noremap <leader>b :w<bar>GoInstall <Cr>
-au FileType go noremap <leader>v :w<bar>GoVet <Cr>
-au FileType go noremap <Leader>r :w<bar>GoRun<CR>
-au FileType go noremap <leader>t :w<bar>GoTest<CR>
-au FileType go Arpeggionnoremap ui :w<bar>GoInstall <Cr>
-au FileType go noremap <F7> :TagbarToggle<CR>
-let g:go_fmt_command = "goimports"
-"Set type info for word under cursor to automatically display
-let g:go_auto_type_info = 1
-let g:go_list_type = "quickfix"
-" End
+"	" make the return to start (r for return) shortcut easier.
+"	nnoremap <buffer> <leader>r <C-t>
+"endfunction
 
-" Colors
-colorscheme molokai
-let g:go_highlight_functions = 1
-let g:go_highlight_methods = 1
-let g:go_highlight_structs = 1
-let g:go_highlight_operators = 1
-" End
-"
-" deoplete config
-" This stops deoplete from selecting the first option in the list
-" automatically.
-set completeopt+=noinsert,menuone
-" enable deoplete
-let g:deoplete#enable_at_startup = 1
-" disable auto popup menu
-let g:deoplete#disable_auto_complete = 1
-" bind complete to ctrl space. This binding looks simpler than the example
-" given by shougo in his deoplete documentation, this  is because he is
-" binding TAB which he wishes to behave as TAB if there is nothing to complete
-" under the cursor. Note the triple braces are for folding markers for vim.;
-"   	inoremap <silent><expr> <TAB>
-"   	\ pumvisible() ? "\<C-n>" :
-"   	\ <SID>check_back_space() ? "\<TAB>" :
-"   	\ deoplete#mappings#manual_complete()
-"   	function! s:check_back_space() abort "{{{
-"   	let col = col('.') - 1
-"   	return !col || getline('.')[col - 1]  =~ '\s'
-"   	endfunction"}}}
-if has("gui_running")
-    inoremap <silent><expr> <Nul> deoplete#mappings#manual_complete()
-else
-    inoremap <silent><expr> <C-@> deoplete#mappings#manual_complete()
-endif
-
-"Close easily
-autocmd BufEnter * call CloseVimWhenEditableFilesClosed()
-function! CloseVimWhenEditableFilesClosed()
-    "echom "BufEnterBegin"
-    let windows = winnr('$')
-    " more than just nerd tree and quickfix open so return
-    if windows > 2
-        return
-    endif
-    let i = 1
-    while i <= windows
-        "echom "". i .": buftype'". getbufvar(winbufnr(i), '&buftype')."'"
-        if getbufvar(winbufnr(i), '&buftype') == ''
-            "this is an editable buffer so return
-            "echom "BufEnterEnd"
-            return
-        endif
-        let i += 1
-    endwhile
-    "all buffers uneditable so close
-    "echom "BufEnterEnd"
-    qa
+" netrw mappings, this needs to be updated for terminal use, Explore expects
+" the current file name to be a file, for terminals it is not a file name so
+" we need to do something different, I'd suggest opening the explore at the
+" same dir that the terminal is in.
+nnoremap <leader>e :call MyExplore()<CR>
+" if the file is not a terminal then use normal explore
+" otherwise explore the cwd.
+function! MyExplore()
+	let l:fname = expand("%")
+	if l:fname =~ "^term:\/\/"
+		:execute ":Explore" getcwd()
+	else
+		:Explore
+	endif
 endfunction
 
-"Add mapping to make ctrl space go to next completion option
-"<Nul> is interpreted as ctrl-space
-"inoremap <Nul> <C-n>
-inoremap <C-j> <C-n>
-inoremap <C-k> <C-p>
-"Ensure that neopairs is adding parenthesis for methods
-"call deoplete#custom#set('_', 'converters', ['converter_auto_paren']) "It
-"turns out that neopairs parenthesis is kindk of annoying, doesn't work like
-"intellij
-"utilsnips
-let g:UltiSnipsSnippetDirectories=["bundle/vim-go/gosnippets/UtilSnips"]
-" Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
+augroup netrw_maps
+	autocmd!
+	autocmd filetype netrw call ApplyNetrwMaps()
+augroup END
 
-" If you want :UltiSnipsEdit to split your window.
-inoremap <silent><expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+function! ApplyNetrwMaps()
+	nnoremap <buffer> <leader>c :<C-u>quit<CR>
+	" In this case netrw has mapped <CR> to some other command
+	" so we need a recursive mapping.
+	Arpeggio nmap <buffer> jk <CR>
+endfunction
 
-"Neovim likes this here
-set spell spelllang=en_gb
+"easytags
+" async means easytags does not block, only an issue if it takes a long time
+"let g:easytags_async = 1
+" autorecurse does as expected but really im using it as a workaraound for the 
+" failiure of "UpdateTags -R" to set the correct paths int the tags files.
+" see - https://github.com/xolox/vim-easytags/issues/45
+"let g:easytags_autorecurse = 1
 
+" fzf buffer switching
+function! s:buflist()
+  redir => ls
+  silent ls
+  redir END
+  return split(ls, '\n')
+endfunction
 
-"Rainbow parenthesis
-au VimEnter * RainbowParenthesesToggle
-au Syntax * RainbowParenthesesLoadRound
-au Syntax * RainbowParenthesesLoadSquare
-au Syntax * RainbowParenthesesLoadBraces
+function! s:bufopen(e)
+  execute 'buffer' matchstr(a:e, '^[ 0-9]*')
+endfunction
 
+nnoremap <silent> <leader>f :call fzf#run({
+\   'source':  reverse(<sid>buflist()),
+\   'sink':    function('<sid>bufopen'),
+\   'options': '+m',
+\   'down':    len(<sid>buflist()) + 2
+\ })<CR>
 
 "ycm
 let g:ycm_filetype_whitelist = {
@@ -304,15 +232,47 @@ let g:ycm_filetype_whitelist = {
 			\ 'c++' : 1,
 			\ 'cc' : 1,
 			\ 'cxx' : 1,
-			\ 'h' : 1,
-			\ 'hpp' : 1,
-			\}
+            \ 'h' : 1,
+            \ 'hpp' : 1,
+            \}
 
-"au BufRead,BufNewFile *.c,*.cpp,*.h,*.hpp,*.h++ set filetype=c
-au FileType cpp nnoremap <Leader>d :<C-u>YcmCompleter GetDoc<CR>
-au FileType cpp nnoremap md :<C-u>YcmCompleter GoTo<CR>
-au FileType cpp nnoremap mh :<C-u>YcmCompleter GoToInclude<CR>
-au Filetype cpp nnoremap <leader>t :<C-u>YcmCompleter GetType<CR>
+"inoremap	\ pumvisible() ? "\<C-p>" : ":\<C-u>lprevious\<CR>"
+"
+"au Filetype cpp,c,h,hpp,c++ inoremap <buffer> <C-j> <C-n>
+"au Filetype cpp,c,h,hpp,c++ inoremap <buffer> <C-k> <C-p>
 
+augroup ycm_maps
+	autocmd!
+	autocmd filetype cpp,c,h,hpp,c++ call ApplyYcmMaps()
+augroup END
 
+function! ApplyYcmMaps()
+	nnoremap <buffer> <leader>q :<C-u>YcmCompleter GetDoc<CR>
+	nnoremap <buffer> <leader>t :<C-u>YcmCompleter GetType<CR>
+	" Allow selecting autocomplete options with c-j and c-n for ycm.
+	inoremap <buffer> <C-j> <C-n>
+	inoremap <buffer> <C-k> <C-p>
 
+	" Allow easy navigation of error locations
+	nnoremap <buffer> <C-j> :<C-u>lnext<CR>
+	nnoremap <buffer> <C-k> :<C-u>lprevious<CR>
+endfunction
+
+" fzf buffer switching
+function! s:buflist()
+  redir => ls
+  silent ls
+  redir END
+  return split(ls, '\n')
+endfunction
+
+function! s:bufopen(e)
+  execute 'buffer' matchstr(a:e, '^[ 0-9]*')
+endfunction
+
+nnoremap <silent> <leader>f :call fzf#run({
+\   'source':  reverse(<sid>buflist()),
+\   'sink':    function('<sid>bufopen'),
+\   'options': '+m',
+\   'down':    len(<sid>buflist()) + 2
+\ })<CR>
