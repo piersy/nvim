@@ -18,6 +18,15 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
 Plug 'Valloric/YouCompleteMe', { 'for' : ['c', 'cpp'] }
 
 Plug 'tpope/vim-surround'
+
+Plug 'fatih/vim-go'
+
+"Kill buffers without killing windows
+Plug 'qpkorr/vim-bufkill'
+
+" Nice parenthesis
+Plug 'kien/rainbow_parentheses.vim'
+
 " Add plugins to &runtimepath.
 call plug#end()
 " Arpeggio needs to be loaded as the init.vim is parsed so that
@@ -45,6 +54,11 @@ set tabstop=4
 " setting it to 0 makes it follow the tabstop setting.
 set shiftwidth=0
 
+" The cinoptions control indenting for c
+" The option below makes indenting for arguments spread across many lines a
+" single tab rather than a doble tab.
+" see :help cino-( 
+set cinoptions=(1s
 " This makes sure that there are x lines of context above/below point
 " scrolled to, it helps to keep your eyes more central on the screen.
 set scrolloff=8
@@ -66,12 +80,24 @@ noremap L g_
 " for operations that are not repeated in quick succession.
 nnoremap <PageUp> <C-U>
 nnoremap <PageDown> <C-D>
+" This overwrites the default mapping of K which opens the man
+" page for the word under the cursor
 nnoremap K <C-U>
 nnoremap J <C-D>
+vnoremap K <C-U>
+vnoremap J <C-D>
+" Open man page for word under cursor '<C-R><C-W>' expands to the word under
+" the cursor
+nnoremap M :Man <C-R><C-W> <CR>
+vnoremap M :Man <C-R><C-W> <CR>
 
 " Provide some easy buffer switching
 nnoremap <C-n> :bnext<CR>
 nnoremap <C-m> :bprevious<CR>
+
+" Navigate command line commands with j and k
+cnoremap <C-j> <Down>
+cnoremap <C-k> <Up>
 
 " I dont ever place marks so I use 'm' as the leader.
 let mapleader = 'm'
@@ -105,6 +131,8 @@ nnoremap <leader>tv :vsplit<CR>:terminal<CR>
 nnoremap <leader>s :<C-u>write<CR>
 nnoremap <leader>c :<C-u>quit<CR>
 nnoremap <leader>C :<C-u>quit!<CR>
+" :BD is provided by bufkill it deletes a buffer without closing the window.
+nnoremap <leader>b :<C-u>BD<CR>
 Arpeggio nnoremap fk :wincmd k <CR> 
 Arpeggio nnoremap fj :wincmd j <CR> 
 Arpeggio nnoremap fh :wincmd h <CR> 
@@ -266,6 +294,23 @@ function! ApplyYcmMaps()
 
 	" make the return to start (r for return) shortcut easier.
 	nnoremap <buffer> <leader>r <C-t>
+endfunction
+
+augroup vimgo_maps
+	autocmd!
+	autocmd filetype go call ApplyVimGoMaps()
+augroup END
+
+function! ApplyVimGoMaps()
+	" make the jump to def (d for def) shortcut easier.
+	nnoremap <buffer> <leader>d :<C-u>GoDef<CR>
+
+	" make the return to start (r for return) shortcut easier.
+	nnoremap <buffer> <leader>r :<C-u>GoDefPop<CR>
+
+	" Map K again in buffer specific mode since it is mapped by go
+	" to get the doc.
+	nnoremap <buffer> K <C-U>
 endfunction
 
 " fzf buffer switching
