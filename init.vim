@@ -57,7 +57,7 @@ set shiftwidth=0
 " The cinoptions control indenting for c
 " The option below makes indenting for arguments spread across many lines a
 " single tab rather than a doble tab.
-" see :help cino-( 
+" see :help cino-(
 set cinoptions=(1s
 " This makes sure that there are x lines of context above/below point
 " scrolled to, it helps to keep your eyes more central on the screen.
@@ -75,7 +75,7 @@ noremap L g_
 " pgup/pgdown move too far to track text easily but ctrl-d and
 " ctrl-u are hard to reach and not comfy. I tried mapping this
 " with arpeggio, but it turns out that trying to repeatedly press
-" two keys together, for example when scrolling down a large 
+" two keys together, for example when scrolling down a large
 " document is not very comfortable. Best to keep arpeggio mappings
 " for operations that are not repeated in quick succession.
 nnoremap <PageUp> <C-U>
@@ -92,8 +92,8 @@ nnoremap M :Man <C-R><C-W> <CR>
 vnoremap M :Man <C-R><C-W> <CR>
 
 " Provide some easy buffer switching
-nnoremap <C-n> :bnext<CR>
-nnoremap <C-m> :bprevious<CR>
+"nnoremap <C-n> :bnext<CR>
+"nnoremap <C-m> :bprevious<CR>
 
 " Navigate command line commands with j and k
 cnoremap <C-j> <Down>
@@ -125,18 +125,18 @@ function! ZoomToggle()
 endfunction
 " Allow easy terminal opening. In order to pass an expression to a command we
 " need to use :execute.
-nnoremap <leader>th :split<CR>:terminal<CR>
-nnoremap <leader>tv :vsplit<CR>:terminal<CR>
+"nnoremap <leader>th :split<CR>:terminal<CR>
+"nnoremap <leader>tv :vsplit<CR>:terminal<CR>
 
 nnoremap <leader>s :<C-u>write<CR>
 nnoremap <leader>c :<C-u>quit<CR>
 nnoremap <leader>C :<C-u>quit!<CR>
 " :BD is provided by bufkill it deletes a buffer without closing the window.
 nnoremap <leader>b :<C-u>BD<CR>
-Arpeggio nnoremap fk :wincmd k <CR> 
-Arpeggio nnoremap fj :wincmd j <CR> 
-Arpeggio nnoremap fh :wincmd h <CR> 
-Arpeggio nnoremap fl :wincmd l <CR> 
+Arpeggio nnoremap fk :wincmd k <CR>
+Arpeggio nnoremap fj :wincmd j <CR>
+Arpeggio nnoremap fh :wincmd h <CR>
+Arpeggio nnoremap fl :wincmd l <CR>
 " Arpeggio standard vim key mappings.
 
 " Map df to esc - no brainer.
@@ -171,8 +171,8 @@ inoremap <CR> <NOP>
 cnoremap <CR> <NOP>
 tnoremap <CR> <NOP>
 
-Arpeggio tnoremap <C-j> <down> 
-Arpeggio tnoremap <C-k> <up> 
+Arpeggio tnoremap <C-j> <down>
+Arpeggio tnoremap <C-k> <up>
 
 
 " make the jump to def (d for def) shortcut easier.
@@ -227,7 +227,7 @@ endfunction
 "easytags
 " async means easytags does not block, only an issue if it takes a long time
 "let g:easytags_async = 1
-" autorecurse does as expected but really im using it as a workaraound for the 
+" autorecurse does as expected but really im using it as a workaraound for the
 " failiure of "UpdateTags -R" to set the correct paths int the tags files.
 " see - https://github.com/xolox/vim-easytags/issues/45
 let g:easytags_autorecurse = 0
@@ -273,14 +273,30 @@ let g:ycm_filetype_whitelist = {
 "au Filetype cpp,c,h,hpp,c++ inoremap <buffer> <C-j> <C-n>
 "au Filetype cpp,c,h,hpp,c++ inoremap <buffer> <C-k> <C-p>
 
+" Strips trailing whitespace and makes sure the cursro returns to it's initial
+" position.
+function! <SID>StripTrailingWhitespaces()
+    let l = line(".")
+    let c = col(".")
+    %s/\s\+$//e
+    call cursor(l, c)
+endfun
+
 augroup ycm_maps
 	autocmd!
 	autocmd filetype cpp,c,h,hpp,c++ call ApplyYcmMaps()
+	" strip trailing whitespace on save
+    "autocmd filetype cpp,c,h,hpp,c++ BufWritePre <buffer> * %s/\s\+$//e
+	"autocmd filetype cpp,c,h,hpp,c++ autocmd BufWritePre <buffer> %s/\s\+$//e
+	autocmd filetype cpp,c,h,hpp,c++ autocmd BufWritePre <buffer> :call <SID>StripTrailingWhitespaces()
 augroup END
 
 function! ApplyYcmMaps()
-	nnoremap <buffer> <leader>q :<C-u>YcmCompleter GetDoc<CR>
 	nnoremap <buffer> <leader>t :<C-u>YcmCompleter GetType<CR>
+	nnoremap <buffer> <leader>q :<C-u>YcmCompleter GetDoc<CR>
+	nnoremap <buffer> <leader>f :<C-u>YcmCompleter FixIt<CR>
+	nnoremap <buffer> <leader>i :<C-u>YcmCompleter GoToInclude<CR>
+	nnoremap <buffer> <leader>g :<C-u>YcmDiags<CR>
 	" Allow selecting autocomplete options with c-j and c-n for ycm.
 	inoremap <buffer> <C-j> <C-n>
 	inoremap <buffer> <C-k> <C-p>
@@ -325,9 +341,39 @@ function! s:bufopen(e)
   execute 'buffer' matchstr(a:e, '^[ 0-9]*')
 endfunction
 
-nnoremap <silent> <leader>f :call fzf#run({
+nnoremap <silent> <leader>l :call fzf#run({
 \   'source':  reverse(<sid>buflist()),
 \   'sink':    function('<sid>bufopen'),
 \   'options': '+m',
 \   'down':    len(<sid>buflist()) + 2
 \ })<CR>
+
+
+"rainbow parenthesis config
+let g:rbpt_max = 16
+let g:rbpt_loadcmd_toggle = 0
+"let g:rbpt_colorpairs = [
+"    \ ['brown',       'RoyalBlue3'],
+"    \ ['Darkblue',    'SeaGreen3'],
+"    \ ['darkgray',    'DarkOrchid3'],
+"    \ ['darkgreen',   'firebrick3'],
+"    \ ['darkcyan',    'RoyalBlue3'],
+"    \ ['darkred',     'SeaGreen3'],
+"    \ ['darkmagenta', 'DarkOrchid3'],
+"    \ ['brown',       'firebrick3'],
+"    \ ['gray',        'RoyalBlue3'],
+"    \ ['black',       'SeaGreen3'],
+"    \ ['darkmagenta', 'DarkOrchid3'],
+"    \ ['Darkblue',    'firebrick3'],
+"    \ ['darkgreen',   'RoyalBlue3'],
+"    \ ['darkcyan',    'SeaGreen3'],
+"    \ ['darkred',     'DarkOrchid3'],
+"    \ ['red',         'firebrick3'],
+"    \ ]
+
+au VimEnter * RainbowParenthesesToggle
+au Syntax * RainbowParenthesesLoadRound
+au Syntax * RainbowParenthesesLoadSquare
+au Syntax * RainbowParenthesesLoadBraces
+au Syntax * RainbowParenthesesLoadChevrons
+
