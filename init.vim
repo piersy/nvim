@@ -19,7 +19,10 @@ Plug 'Valloric/YouCompleteMe', { 'for' : ['c', 'cpp'] }
 
 Plug 'tpope/vim-surround'
 
-Plug 'fatih/vim-go'
+" golang plugins
+Plug 'fatih/vim-go', { 'tag': 'v1.13' }
+Plug 'Shougo/deoplete.nvim', { 'tag': '2.0', 'do': ':UpdateRemotePlugins' }
+Plug 'zchee/deoplete-go', { 'do': 'make' }
 
 "Kill buffers without killing windows
 Plug 'qpkorr/vim-bufkill'
@@ -62,6 +65,8 @@ set cinoptions=(1s
 " This makes sure that there are x lines of context above/below point
 " scrolled to, it helps to keep your eyes more central on the screen.
 set scrolloff=8
+" show a bit of info regarding selected blocks
+set showcmd
 
 
 " Standard vim key mappings.
@@ -132,7 +137,7 @@ nnoremap <leader>s :<C-u>write<CR>
 nnoremap <leader>c :<C-u>quit<CR>
 nnoremap <leader>C :<C-u>quit!<CR>
 " :BD is provided by bufkill it deletes a buffer without closing the window.
-nnoremap <leader>b :<C-u>BD<CR>
+"nnoremap <leader>b :<C-u>BD<CR>
 Arpeggio nnoremap fk :wincmd k <CR>
 Arpeggio nnoremap fj :wincmd j <CR>
 Arpeggio nnoremap fh :wincmd h <CR>
@@ -161,6 +166,7 @@ noremap <esc> <NOP>
 " Map jk to <CR> for insert and commandline mode.
 Arpeggio inoremap jk <CR>
 Arpeggio cnoremap jk <CR>
+Arpeggio nnoremap jk <CR>
 
 " As with esc we have to map fj instead of jk so that when using vim inside a
 " terminal in vim we do not trigger the <CR>  of the terminal.
@@ -168,11 +174,28 @@ Arpeggio tnoremap fj <CR>
 
 " Remove the original <CR> key functionality.
 inoremap <CR> <NOP>
-cnoremap <CR> <NOP>
-tnoremap <CR> <NOP>
+"cnoremap <CR> <NOP>
+"tnoremap <CR> <NOP>
 
 Arpeggio tnoremap <C-j> <down>
 Arpeggio tnoremap <C-k> <up>
+
+augroup yaml_config
+	autocmd!
+	autocmd filetype yml,yaml call ConfigureYaml()
+augroup END
+
+function! ConfigureYaml()
+	" Set tabs to be represented by 2 spaces;
+	setlocal tabstop=2
+
+	" The shiftwidth controls the indent usded for autoindenting
+	" setting it to 0 makes it follow the tabstop setting.
+	setlocal shiftwidth=0
+	
+	" Ensures that tabs are expanded to spaces when inserted
+	setlocal expandtab
+endfunction
 
 
 " make the jump to def (d for def) shortcut easier.
@@ -236,7 +259,6 @@ function! UpdateTagsRecursive()
 	:execute ":UpdateTags -R --tag-relative " expand('%:p:h')
 endfunction
 
-
 " fzf buffer switching
 function! s:buflist()
   redir => ls
@@ -273,7 +295,7 @@ let g:ycm_filetype_whitelist = {
 "au Filetype cpp,c,h,hpp,c++ inoremap <buffer> <C-j> <C-n>
 "au Filetype cpp,c,h,hpp,c++ inoremap <buffer> <C-k> <C-p>
 
-" Strips trailing whitespace and makes sure the cursro returns to it's initial
+" Strips trailing whitespace and makes sure the cursor returns to it's initial
 " position.
 function! <SID>StripTrailingWhitespaces()
     let l = line(".")
@@ -297,7 +319,7 @@ function! ApplyYcmMaps()
 	nnoremap <buffer> <leader>f :<C-u>YcmCompleter FixIt<CR>
 	nnoremap <buffer> <leader>i :<C-u>YcmCompleter GoToInclude<CR>
 	nnoremap <buffer> <leader>g :<C-u>YcmDiags<CR>
-	" Allow selecting autocomplete options with c-j and c-n for ycm.
+	" Allow selecting autocomplete options with c-j and c-k for ycm.
 	inoremap <buffer> <C-j> <C-n>
 	inoremap <buffer> <C-k> <C-p>
 
@@ -308,9 +330,55 @@ function! ApplyYcmMaps()
 	" make the jump to def (d for def) shortcut easier.
 	nnoremap <buffer> <leader>d <C-]>
 
+	" goto file in vertical split
+	nnoremap <buffer> <leader>v :<C-u>vsplit<CR>:exec("tag ".expand("<cword>"))<CR>
+	" goto file in horizontal split
+	nnoremap <buffer> <leader>h :<C-u>split<CR>:exec("tag ".expand("<cword>"))<CR>
 	" make the return to start (r for return) shortcut easier.
 	nnoremap <buffer> <leader>r <C-t>
+
 endfunction
+
+"let g:deoplete#sources#go#gocode_binary = '/home/piers/projects/yoti-backend/go/bin/gocode '
+" deoplete config
+" This stops deoplete from selecting the first option in the list
+" automatically.
+set completeopt+=noinsert,menuone
+" enable deoplete
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+let g:deoplete#sources#go#use_cache = 1
+let g:deoplete#sources#go#json_directory = '/path/to/data_dir'
+" disable auto popup menu
+let g:deoplete#disable_auto_complete = 1
+" bind complete to ctrl space. This binding looks simpler than the example
+" given by shougo in his deoplete documentation, this  is because he is
+" binding TAB which he wishes to behave as TAB if there is nothing to complete
+" under the cursor. Note the triple braces are for folding markers for vim.;
+"      inoremap <silent><expr> <TAB>
+"      \ pumvisible() ? "\<C-n>" :
+"      \ <SID>check_back_space() ? "\<TAB>" :
+"      \ deoplete#mappings#manual_complete()
+"      function! s:check_back_space() abort "{{{
+"      let col = col('.') - 1
+"      return !col || getline('.')[col - 1]  =~ '\s'
+"      endfunction"}}}
+
+" My siplified version of above
+if has("gui_running")
+    inoremap <silent><expr> <Nul> deoplete#mappings#manual_complete()
+else
+    inoremap <silent><expr> <C-@> deoplete#mappings#manual_complete()
+endif
+
+" Dont use the location list
+let g:go_list_type = "quickfix"
+
+function! <SID>GoBuildMaintainPosition()
+	let l:winview = winsaveview()
+	GoBuild
+	call winrestview(l:winview)
+endfun
 
 augroup vimgo_maps
 	autocmd!
@@ -318,6 +386,23 @@ augroup vimgo_maps
 augroup END
 
 function! ApplyVimGoMaps()
+	" Automatic write on build
+	setlocal autowrite
+	" Set save to build, which will automatically write.
+	" The exclamation mark stops the command jumping to the
+	" first error.
+	"nnoremap <buffer> <leader>s :<C-u>call <SID>GoBuildMaintainPosition()<CR>
+	nnoremap <buffer> <leader>s :<C-u>GoBuild!<CR>
+
+	" Easy doc
+	nnoremap <buffer> <leader>q :<C-u>GoDoc<CR>
+
+	" Easy doc
+	nnoremap <buffer> <leader>u :<C-u>GoReferrers<CR>
+	"Use go imports on save
+	let g:go_fmt_command = "goimports"
+
+
 	" make the jump to def (d for def) shortcut easier.
 	nnoremap <buffer> <leader>d :<C-u>GoDef<CR>
 
@@ -327,53 +412,47 @@ function! ApplyVimGoMaps()
 	" Map K again in buffer specific mode since it is mapped by go
 	" to get the doc.
 	nnoremap <buffer> K <C-U>
-endfunction
 
-" fzf buffer switching
-function! s:buflist()
-  redir => ls
-  silent ls
-  redir END
-  return split(ls, '\n')
-endfunction
+	nnoremap <C-n> :cnext<CR>
+	nnoremap <C-m> :cprevious<CR>
+	"nnoremap <leader>a :cclose<CR>
+	
+	" Allow selecting autocomplete options with c-j and c-k for deoplete.
+	inoremap <buffer> <C-j> <C-n>
+	inoremap <buffer> <C-k> <C-p>
 
-function! s:bufopen(e)
-  execute 'buffer' matchstr(a:e, '^[ 0-9]*')
+	" goto file in vertical split
+	nnoremap <buffer> <leader>v :<C-u>vsplit<CR>:exec("GoDef ".expand("<cword>"))<CR>
+	" goto file in horizontal split
+	nnoremap <buffer> <leader>h :<C-u>split<CR>:exec("GoDef ".expand("<cword>"))<CR>
 endfunction
-
-nnoremap <silent> <leader>l :call fzf#run({
-\   'source':  reverse(<sid>buflist()),
-\   'sink':    function('<sid>bufopen'),
-\   'options': '+m',
-\   'down':    len(<sid>buflist()) + 2
-\ })<CR>
 
 
 "rainbow parenthesis config
 let g:rbpt_max = 16
 let g:rbpt_loadcmd_toggle = 0
-"let g:rbpt_colorpairs = [
-"    \ ['brown',       'RoyalBlue3'],
-"    \ ['Darkblue',    'SeaGreen3'],
-"    \ ['darkgray',    'DarkOrchid3'],
-"    \ ['darkgreen',   'firebrick3'],
-"    \ ['darkcyan',    'RoyalBlue3'],
-"    \ ['darkred',     'SeaGreen3'],
-"    \ ['darkmagenta', 'DarkOrchid3'],
-"    \ ['brown',       'firebrick3'],
-"    \ ['gray',        'RoyalBlue3'],
-"    \ ['black',       'SeaGreen3'],
-"    \ ['darkmagenta', 'DarkOrchid3'],
-"    \ ['Darkblue',    'firebrick3'],
-"    \ ['darkgreen',   'RoyalBlue3'],
-"    \ ['darkcyan',    'SeaGreen3'],
-"    \ ['darkred',     'DarkOrchid3'],
-"    \ ['red',         'firebrick3'],
-"    \ ]
+let g:rbpt_colorpairs = [
+    \ ['brown',       'RoyalBlue3'],
+    \ ['Darkblue',    'SeaGreen3'],
+    \ ['darkgray',    'DarkOrchid3'],
+    \ ['darkgreen',   'firebrick3'],
+    \ ['darkcyan',    'RoyalBlue3'],
+    \ ['darkred',     'SeaGreen3'],
+    \ ['darkmagenta', 'DarkOrchid3'],
+    \ ['brown',       'firebrick3'],
+    \ ['gray',        'RoyalBlue3'],
+    \ ['black',       'SeaGreen3'],
+    \ ['darkmagenta', 'DarkOrchid3'],
+    \ ['Darkblue',    'firebrick3'],
+    \ ['darkgreen',   'RoyalBlue3'],
+    \ ['darkcyan',    'SeaGreen3'],
+    \ ['darkred',     'DarkOrchid3'],
+    \ ['red',         'firebrick3'],
+    \ ]
 
 au VimEnter * RainbowParenthesesToggle
 au Syntax * RainbowParenthesesLoadRound
 au Syntax * RainbowParenthesesLoadSquare
 au Syntax * RainbowParenthesesLoadBraces
-au Syntax * RainbowParenthesesLoadChevrons
+"au Syntax * RainbowParenthesesLoadChevrons
 
