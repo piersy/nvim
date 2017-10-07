@@ -7,20 +7,8 @@ Plug 'tomasr/molokai'
 " Map multiple simultaneous key presses.
 Plug 'houshuang/vim-arpeggio'
 
-" Handle tags easily
-"Plug 'xolox/vim-easytags' | Plug 'xolox/vim-misc'
-
-" Update tags automatically
-"Plug 'craigemery/vim-autotag'
-" Higlight tags 
-"Plug 'vim-scripts/TagHighlight'
-
-" Find and open files easily.
-"Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
-"Plug 'junegunn/fzf.vim'
-
 " Autocomplete and semantic highlighting for c and c++.
-Plug 'Valloric/YouCompleteMe', { 'for' : ['c', 'cpp'] }
+Plug 'Valloric/YouCompleteMe', { 'for' : ['c', 'cpp', 'python'] , 'do': './install.py --clang-completer'}
 
 Plug 'tpope/vim-surround'
 
@@ -29,15 +17,31 @@ Plug 'fatih/vim-go', { 'tag': 'v1.13' }
 Plug 'Shougo/deoplete.nvim', { 'tag': '2.0', 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make' }
 
-"Kill buffers without killing windows
-"Plug 'qpkorr/vim-bufkill' this was behaving pretty strangely when switching
-"windows.
-
 " Nice parenthesis
 Plug 'kien/rainbow_parentheses.vim'
 
+" unused plugins {{{
+" Handle tags easily
+"Plug 'xolox/vim-easytags' | Plug 'xolox/vim-misc'
+
+" Update tags automatically
+"Plug 'craigemery/vim-autotag'
+
+" Higlight tags 
+"Plug 'vim-scripts/TagHighlight'
+
+" Find and open files easily.
+"Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
+"Plug 'junegunn/fzf.vim'
+
+"Kill buffers without killing windows
+"Plug 'qpkorr/vim-bufkill' this was behaving pretty strangely when switching
+"windows.
+"}}}
+
 " Add plugins to &runtimepath.
 call plug#end()
+
 " Arpeggio needs to be loaded as the init.vim is parsed so that
 " it can be used for defining key mappings.
 call arpeggio#load()
@@ -45,7 +49,7 @@ call arpeggio#load()
 " Sets the molokai colorscheme without this line you get normal colors.
 colorscheme molokai
 
-" Standard vim settings.
+" generic vim options {{{
 
 " Permanently display line numbers at the side of the screen.
 set number
@@ -73,10 +77,11 @@ set cinoptions=(1s
 set scrolloff=8
 " show a bit of info regarding selected blocks
 set showcmd
+" allow folding using '{{{' and '}}}'
+set foldmethod=marker
+"}}}
 
-
-" Standard vim key mappings.
-
+" generic vim key mappings {{{
 " go to beginning of line.
 noremap H 0
 " go to end of line not including carriage return.
@@ -134,6 +139,7 @@ function! ZoomToggle()
 		:execute ":normal! \<C-w>|\<C-w>_"
 	endif
 endfunction
+
 " Allow easy terminal opening. In order to pass an expression to a command we
 " need to use :execute.
 "nnoremap <leader>th :split<CR>:terminal<CR>
@@ -157,7 +163,7 @@ Arpeggio noremap <silent> df :<C-u>nohlsearch<CR><esc>
 " Map fn to equivalient of escape in terminal mode. We can't map df here
 " otherwise when we have vim inside a terminal in vim and we escape the df
 " would escape the terminal rather than be passed to the vim inside the
-" terminal. We alos add a search back to first line starting with a dollar
+" terminal. We also add a search back to first line starting with a dollar
 " then remove search highlighting. This stops the cursor appearing at the
 " bottom when we escape.
 Arpeggio tnoremap fn <C-\><C-n>G?^\$<CR>:<C-u>nohlsearch<CR>
@@ -187,6 +193,21 @@ Arpeggio tnoremap <C-k> <up>
 " Toggle spell
 nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 
+" end genric key mappings }}}
+
+" generic utility functions {{{
+
+" Strips trailing whitespace and makes sure the cursor returns to it's initial
+" position.
+function! <SID>StripTrailingWhitespaces()
+    let l = line(".")
+    let c = col(".")
+    %s/\s\+$//e
+    call cursor(l, c)
+endfun
+"}}}
+
+" yaml file type config {{{
 augroup yaml_config
 	autocmd!
 	autocmd filetype yml,yaml call ConfigureYaml()
@@ -203,16 +224,11 @@ function! ConfigureYaml()
 	" Ensures that tabs are expanded to spaces when inserted
 	setlocal expandtab
 endfunction
+"}}}
 
-
-" make the jump to def (d for def) shortcut easier.
-"nnoremap <buffer> <leader>d <C-]>
-
-" make the return to start (r for return) shortcut easier.
-"nnoremap <buffer> <leader>r <C-t>
-
-" help mappings have to be set here otherwise overwritten with more buffer
-" specific maps
+" help buffer key mappings {{{
+" help mappings have to be set here otherwise they are overwritten with more
+" buffer specific maps
 augroup help_maps
 	autocmd!
 	autocmd filetype help call ConfigureHelp()
@@ -225,8 +241,10 @@ function! ConfigureHelp()
 	" make the return to start (r for return) shortcut easier.
 	nnoremap <buffer> <leader>r <C-t>
 endfunction
+"}}}
 
-" netrw mappings, this needs to be updated for terminal use, Explore expects
+" netrw buffer key mappings {{{
+" This needs to be updated for terminal use, Explore expects
 " the current file name to be a file, for terminals it is not a file name so
 " we need to do something different, I'd suggest opening the explore at the
 " same dir that the terminal is in.
@@ -253,14 +271,9 @@ function! ApplyNetrwMaps()
 	" so we need a recursive mapping.
 	Arpeggio nmap <buffer> jk <CR>
 endfunction
+"}}}
 
-if ! exists('g:TagHighlightSettings')
-	let g:TagHighlightSettings = {}
-endif
-let g:TagHighlightSettings['Languages'] = ["c","c++"]
-let g:TagHighlightSettings['IncludeLocals'] = 'True'
-
-""easytags
+" easytags unused config {{{
 "" async means easytags does not block, only an issue if it takes a long time
 "let g:easytags_async = 1
 "" autorecurse does as expected but really im using it as a workaraound for the
@@ -276,8 +289,9 @@ let g:TagHighlightSettings['IncludeLocals'] = 'True'
 "function! UpdateTagsRecursive()
 "	:execute ":UpdateTags -R --tag-relative " expand('%:p:h')
 "endfunction
+"}}}
 
-" fzf buffer switching
+" fzf buffer switching {{{
 function! s:buflist()
   redir => ls
   silent ls
@@ -295,8 +309,9 @@ nnoremap <silent> <leader>b :call fzf#run({
 \   'options': '+m',
 \   'down':    len(<sid>buflist()) + 2
 \ })<CR>
+"}}}
 
-"ycm
+"general ycm config {{{
 let g:ycm_filetype_whitelist = {
 			\ 'C' : 1,
 			\ 'c' : 1,
@@ -306,32 +321,53 @@ let g:ycm_filetype_whitelist = {
 			\ 'cxx' : 1,
             \ 'h' : 1,
             \ 'hpp' : 1,
+            \ 'py' : 1,
+            \ 'python' : 1,
             \}
+"}}}
 
-"inoremap	\ pumvisible() ? "\<C-p>" : ":\<C-u>lprevious\<CR>"
-"
-"au Filetype cpp,c,h,hpp,c++ inoremap <buffer> <C-j> <C-n>
-"au Filetype cpp,c,h,hpp,c++ inoremap <buffer> <C-k> <C-p>
-
-" Strips trailing whitespace and makes sure the cursor returns to it's initial
-" position.
-function! <SID>StripTrailingWhitespaces()
-    let l = line(".")
-    let c = col(".")
-    %s/\s\+$//e
-    call cursor(l, c)
-endfun
-
-augroup ycm_maps
+"python ycm config {{{ 
+augroup ycm_python
 	autocmd!
-	autocmd filetype cpp,c,h,hpp,c++ call ApplyYcmMaps()
+	autocmd filetype python,py call ConfigureYcmForPython()
+	" strip trailing whitespace on save
+	autocmd filetype python,py  autocmd BufWritePre <buffer> :call <SID>StripTrailingWhitespaces()
+augroup END
+
+function! ConfigureYcmForPython()
+
+	nnoremap <buffer> <leader>t :<C-u>YcmCompleter GetType<CR>
+	nnoremap <buffer> <leader>q :<C-u>YcmCompleter GetDoc<CR>
+	nnoremap <buffer> <leader>f :<C-u>YcmCompleter FixIt<CR>
+	nnoremap <buffer> <leader>i :<C-u>YcmCompleter GoToInclude<CR>
+	nnoremap <buffer> <leader>g :<C-u>YcmDiags<CR>
+	" Allow selecting autocomplete options with c-j and c-k for ycm.
+	inoremap <buffer> <C-j> <C-n>
+	inoremap <buffer> <C-k> <C-p>
+
+	" Allow easy navigation of error locations
+	nnoremap <buffer> <C-j> :<C-u>lnext<CR>
+	nnoremap <buffer> <C-k> :<C-u>lprevious<CR>
+
+	" make the jump to def (d for def) shortcut easier.
+	nnoremap <buffer> <leader>d :<C-u>YcmCompleter GoTo<CR>
+
+	" make the return to start (r for return) shortcut easier.
+	"nnoremap <buffer> <leader>r <C-t>
+
+endfunction "}}}
+
+" c ycm config {{{
+augroup ycm_c
+	autocmd!
+	autocmd filetype cpp,c,h,hpp,c++ call ConfigureYcmForC()
 	" strip trailing whitespace on save
     "autocmd filetype cpp,c,h,hpp,c++ BufWritePre <buffer> * %s/\s\+$//e
 	"autocmd filetype cpp,c,h,hpp,c++ autocmd BufWritePre <buffer> %s/\s\+$//e
 	autocmd filetype cpp,c,h,hpp,c++ autocmd BufWritePre <buffer> :call <SID>StripTrailingWhitespaces()
 augroup END
 
-function! ApplyYcmMaps()
+function! ConfigureYcmForC()
 	nnoremap <buffer> <leader>t :<C-u>YcmCompleter GetType<CR>
 	nnoremap <buffer> <leader>q :<C-u>YcmCompleter GetDoc<CR>
 	nnoremap <buffer> <leader>f :<C-u>YcmCompleter FixIt<CR>
@@ -355,10 +391,9 @@ function! ApplyYcmMaps()
 	" make the return to start (r for return) shortcut easier.
 	nnoremap <buffer> <leader>r <C-t>
 
-endfunction
+endfunction "}}}
 
-"let g:deoplete#sources#go#gocode_binary = '/home/piers/projects/yoti-backend/go/bin/gocode '
-" deoplete config
+" deoplete config {{{
 " This stops deoplete from selecting the first option in the list
 " automatically.
 set completeopt+=noinsert,menuone
@@ -369,34 +404,31 @@ let g:deoplete#sources#go#use_cache = 1
 let g:deoplete#sources#go#json_directory = '/path/to/data_dir'
 " disable auto popup menu
 let g:deoplete#disable_auto_complete = 1
+
 " bind complete to ctrl space. This binding looks simpler than the example
 " given by shougo in his deoplete documentation, this  is because he is
 " binding TAB which he wishes to behave as TAB if there is nothing to complete
-" under the cursor. Note the triple braces are for folding markers for vim.;
+" under the cursor.
+" shuogos tab to autocomplete {{{
 "      inoremap <silent><expr> <TAB>
 "      \ pumvisible() ? "\<C-n>" :
 "      \ <SID>check_back_space() ? "\<TAB>" :
 "      \ deoplete#mappings#manual_complete()
-"      function! s:check_back_space() abort "{{{
+"      function! s:check_back_space() abort 
 "      let col = col('.') - 1
 "      return !col || getline('.')[col - 1]  =~ '\s'
-"      endfunction"}}}
-
+"      endfunction }}}
 " My siplified version of above
 if has("gui_running")
     inoremap <silent><expr> <Nul> deoplete#mappings#manual_complete()
 else
     inoremap <silent><expr> <C-@> deoplete#mappings#manual_complete()
 endif
+"}}}
 
+" vim go config {{{
 " Dont use the location list
 let g:go_list_type = "quickfix"
-
-function! <SID>GoBuildMaintainPosition()
-	let l:winview = winsaveview()
-	GoBuild
-	call winrestview(l:winview)
-endfun
 
 augroup vimgo_maps
 	autocmd!
@@ -409,7 +441,6 @@ function! ApplyVimGoMaps()
 	" Set save to build, which will automatically write.
 	" The exclamation mark stops the command jumping to the
 	" first error.
-	"nnoremap <buffer> <leader>s :<C-u>call <SID>GoBuildMaintainPosition()<CR>
 	nnoremap <buffer> <leader>s :<C-u>GoBuild!<CR>
 
 	" Easy doc
@@ -443,10 +474,9 @@ function! ApplyVimGoMaps()
 	nnoremap <buffer> <leader>v :<C-u>vsplit<CR>:exec("GoDef ".expand("<cword>"))<CR>
 	" goto file in horizontal split
 	nnoremap <buffer> <leader>h :<C-u>split<CR>:exec("GoDef ".expand("<cword>"))<CR>
-endfunction
+endfunction "}}}
 
-
-"rainbow parenthesis config
+"rainbow parenthesis config {{{
 let g:rbpt_max = 16
 let g:rbpt_loadcmd_toggle = 0
 let g:rbpt_colorpairs = [
@@ -473,4 +503,5 @@ au Syntax * RainbowParenthesesLoadRound
 au Syntax * RainbowParenthesesLoadSquare
 au Syntax * RainbowParenthesesLoadBraces
 "au Syntax * RainbowParenthesesLoadChevrons
+" }}}
 
