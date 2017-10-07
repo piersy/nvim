@@ -5,13 +5,18 @@ call plug#begin()
 Plug 'tomasr/molokai'
 
 " Map multiple simultaneous key presses.
-Plug 'kana/vim-arpeggio'
+Plug 'houshuang/vim-arpeggio'
 
 " Handle tags easily
-Plug 'xolox/vim-easytags' | Plug 'xolox/vim-misc'
+"Plug 'xolox/vim-easytags' | Plug 'xolox/vim-misc'
+
+" Update tags automatically
+"Plug 'craigemery/vim-autotag'
+" Higlight tags 
+"Plug 'vim-scripts/TagHighlight'
 
 " Find and open files easily.
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
+"Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
 "Plug 'junegunn/fzf.vim'
 
 " Autocomplete and semantic highlighting for c and c++.
@@ -25,7 +30,8 @@ Plug 'Shougo/deoplete.nvim', { 'tag': '2.0', 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make' }
 
 "Kill buffers without killing windows
-Plug 'qpkorr/vim-bufkill'
+"Plug 'qpkorr/vim-bufkill' this was behaving pretty strangely when switching
+"windows.
 
 " Nice parenthesis
 Plug 'kien/rainbow_parentheses.vim'
@@ -136,8 +142,6 @@ endfunction
 nnoremap <leader>s :<C-u>write<CR>
 nnoremap <leader>c :<C-u>quit<CR>
 nnoremap <leader>C :<C-u>quit!<CR>
-" :BD is provided by bufkill it deletes a buffer without closing the window.
-"nnoremap <leader>b :<C-u>BD<CR>
 Arpeggio nnoremap fk :wincmd k <CR>
 Arpeggio nnoremap fj :wincmd j <CR>
 Arpeggio nnoremap fh :wincmd h <CR>
@@ -179,6 +183,9 @@ inoremap <CR> <NOP>
 
 Arpeggio tnoremap <C-j> <down>
 Arpeggio tnoremap <C-k> <up>
+
+" Toggle spell
+nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 
 augroup yaml_config
 	autocmd!
@@ -247,17 +254,28 @@ function! ApplyNetrwMaps()
 	Arpeggio nmap <buffer> jk <CR>
 endfunction
 
-"easytags
-" async means easytags does not block, only an issue if it takes a long time
+if ! exists('g:TagHighlightSettings')
+	let g:TagHighlightSettings = {}
+endif
+let g:TagHighlightSettings['Languages'] = ["c","c++"]
+let g:TagHighlightSettings['IncludeLocals'] = 'True'
+
+""easytags
+"" async means easytags does not block, only an issue if it takes a long time
 "let g:easytags_async = 1
-" autorecurse does as expected but really im using it as a workaraound for the
-" failiure of "UpdateTags -R" to set the correct paths int the tags files.
-" see - https://github.com/xolox/vim-easytags/issues/45
-let g:easytags_autorecurse = 0
-" easytags is not intuitive this function works around its surprises
-function! UpdateTagsRecursive()
-	:execute ":UpdateTags -R --tag-relative " expand('%:p:h')
-endfunction
+"" autorecurse does as expected but really im using it as a workaraound for the
+"" failiure of "UpdateTags -R" to set the correct paths int the tags files.
+"" see - https://github.com/xolox/vim-easytags/issues/45
+""let g:easytags_auto_update = 0
+"let g:easytags_autorecurse = 0
+""let g:easytags_auto_highlight = 0
+""let g:easytags_on_cursorhold = 0
+"" easytags is not intuitive this function works around its surprises
+"let g:easytags_opts = ['--languages=C,C++']
+
+"function! UpdateTagsRecursive()
+"	:execute ":UpdateTags -R --tag-relative " expand('%:p:h')
+"endfunction
 
 " fzf buffer switching
 function! s:buflist()
@@ -271,7 +289,7 @@ function! s:bufopen(e)
   execute 'buffer' matchstr(a:e, '^[ 0-9]*')
 endfunction
 
-nnoremap <silent> <leader>f :call fzf#run({
+nnoremap <silent> <leader>b :call fzf#run({
 \   'source':  reverse(<sid>buflist()),
 \   'sink':    function('<sid>bufopen'),
 \   'options': '+m',
