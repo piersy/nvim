@@ -17,6 +17,15 @@ Plug 'tpope/vim-surround'
 " Autocomplete
 Plug 'Shougo/deoplete.nvim', { 'tag': '3.0', 'do': ':UpdateRemotePlugins' }
 
+" Go sources for deoplete
+Plug 'zchee/deoplete-go', { 'do': 'make'}
+
+" Language server
+Plug 'autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
+
 " golang plugins
 Plug 'fatih/vim-go', { 'tag': 'v1.13' }
 
@@ -30,6 +39,7 @@ call plug#end()
 " Arpeggio needs to be loaded as the init.vim is parsed so that
 " it can be used for defining key mappings.
 call arpeggio#load()
+
 
 " Sets the molokai colorscheme without this line you get normal colors.
 colorscheme molokai
@@ -286,35 +296,23 @@ let g:deoplete#enable_at_startup = 1
 " automatically.
 set completeopt+=noinsert,menuone
 
-" disable auto popup menu
+" Disable auto popup menu
 let g:deoplete#disable_auto_complete = 1
 
-" bind complete to ctrl space. This binding looks simpler than the example
-" given by shougo in his deoplete documentation, this  is because he is
-" binding TAB which he wishes to behave as TAB if there is nothing to complete
-" under the cursor.
-" shuogos tab to autocomplete {{{
-"      inoremap <silent><expr> <TAB>
-"      \ pumvisible() ? "\<C-n>" :
-"      \ <SID>check_back_space() ? "\<TAB>" :
-"      \ deoplete#mappings#manual_complete()
-"      function! s:check_back_space() abort 
-"      let col = col('.') - 1
-"      return !col || getline('.')[col - 1]  =~ '\s'
-"      endfunction }}}
-" My siplified version of above
-if has("gui_running")
-    inoremap <silent><expr> <Nul> deoplete#mappings#manual_complete()
-else
-    inoremap <silent><expr> <C-@> deoplete#mappings#manual_complete()
-endif
+" Set ctrl+space to show completion menu.
+inoremap <expr><C-Space> deoplete#mappings#manual_complete()
 
 " Allow selecting autocomplete options with c-j and c-k.
-inoremap <buffer> <C-j> <C-n>
-inoremap <buffer> <C-k> <C-p>
+inoremap <C-j> <C-n>
+inoremap <C-k> <C-p>
 
 "}}}
 
+" deoplete go config {{{
+
+" Set path to gocode binary, this is recommended for performance reasons
+let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
+"}}}
 
 " vim go config {{{
 
