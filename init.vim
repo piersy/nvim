@@ -6,10 +6,13 @@ Plug 'tomasr/molokai'
 
 " Map multiple simultaneous key presses.
 Plug 'houshuang/vim-arpeggio'
+" Syntax highlighting for solidity .sol files
+Plug 'tomlion/vim-solidity'
 
 " Autocomplete and semantic highlighting for c and c++.
 Plug 'Valloric/YouCompleteMe', { 'for' : ['c', 'cpp', 'python'] , 'do': './install.py --clang-completer'}
 
+" Surround text objects with more text
 Plug 'tpope/vim-surround'
 
 " golang plugins
@@ -37,7 +40,11 @@ Plug 'kien/rainbow_parentheses.vim'
 "Kill buffers without killing windows
 "Plug 'qpkorr/vim-bufkill' this was behaving pretty strangely when switching
 "windows.
+
+" Automatically close parenthesis's or paired stuff
+"Plug 'jiangmiao/auto-pairs' - just annoying
 "}}}
+
 
 " Add plugins to &runtimepath.
 call plug#end()
@@ -226,6 +233,25 @@ function! ConfigureYaml()
 endfunction
 "}}}
 
+" android_manifest file type config {{{
+augroup android_manifest_config
+	autocmd!
+	autocmd BufRead AndroidManifest.xml call ConfigureAndroidManifest()
+augroup END
+
+function! ConfigureAndroidManifest()
+	" Set tabs to be represented by 2 spaces;
+	setlocal tabstop=4
+
+	" The shiftwidth controls the indent usded for autoindenting
+	" setting it to 0 makes it follow the tabstop setting.
+	setlocal shiftwidth=0
+	
+	" Ensures that tabs are expanded to spaces when inserted
+	setlocal expandtab
+endfunction
+"}}}
+
 " help buffer key mappings {{{
 " help mappings have to be set here otherwise they are overwritten with more
 " buffer specific maps
@@ -291,25 +317,24 @@ endfunction
 "endfunction
 "}}}
 
-" fzf buffer switching {{{
-function! s:buflist()
-  redir => ls
-  silent ls
-  redir END
-  return split(ls, '\n')
-endfunction
+" fzf buffer switching
+"function! s:buflist()
+"  redir => ls
+"  silent ls
+"  redir END
+"  return split(ls, '\n')
+"endfunction
 
-function! s:bufopen(e)
-  execute 'buffer' matchstr(a:e, '^[ 0-9]*')
-endfunction
+"function! s:bufopen(e)
+"  execute 'buffer' matchstr(a:e, '^[ 0-9]*')
+"endfunction
 
-nnoremap <silent> <leader>b :call fzf#run({
-\   'source':  reverse(<sid>buflist()),
-\   'sink':    function('<sid>bufopen'),
-\   'options': '+m',
-\   'down':    len(<sid>buflist()) + 2
-\ })<CR>
-"}}}
+"nnoremap <silent> <leader>b :call fzf#run({
+"\   'source':  reverse(<sid>buflist()),
+"\   'sink':    function('<sid>bufopen'),
+"\   'options': '+m',
+"\   'down':    len(<sid>buflist()) + 2
+"\ })<CR>
 
 "general ycm config {{{
 let g:ycm_filetype_whitelist = {
@@ -441,7 +466,8 @@ function! ApplyVimGoMaps()
 	" Set save to build, which will automatically write.
 	" The exclamation mark stops the command jumping to the
 	" first error.
-	nnoremap <buffer> <leader>s :<C-u>GoBuild!<CR>
+	"nnoremap <buffer> <leader>s :<C-u>call <SID>GoBuildMaintainPosition()<CR>
+	nnoremap <buffer> <leader>b :<C-u>GoBuild!<CR>
 
 	" Easy doc
 	nnoremap <buffer> <leader>q :<C-u>GoDoc<CR>
@@ -489,14 +515,15 @@ let g:rbpt_colorpairs = [
     \ ['darkmagenta', 'DarkOrchid3'],
     \ ['brown',       'firebrick3'],
     \ ['gray',        'RoyalBlue3'],
-    \ ['black',       'SeaGreen3'],
     \ ['darkmagenta', 'DarkOrchid3'],
-    \ ['Darkblue',    'firebrick3'],
     \ ['darkgreen',   'RoyalBlue3'],
     \ ['darkcyan',    'SeaGreen3'],
     \ ['darkred',     'DarkOrchid3'],
     \ ['red',         'firebrick3'],
     \ ]
+
+    "\ ['black',       'SeaGreen3'],
+    "\ ['Darkblue',    'firebrick3'],
 
 au VimEnter * RainbowParenthesesToggle
 au Syntax * RainbowParenthesesLoadRound
