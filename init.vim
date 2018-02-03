@@ -34,6 +34,9 @@ call arpeggio#load()
 " Sets the molokai colorscheme without this line you get normal colors.
 colorscheme molokai
 
+" Work around for broken xfce4-terminal stops garbage characters being printed
+" in neovim 0.2.2+
+set guicursor=
 " generic vim options {{{
 
 " Permanently display line numbers at the side of the screen.
