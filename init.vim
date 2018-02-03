@@ -15,7 +15,7 @@ Plug 'tomlion/vim-solidity'
 Plug 'tpope/vim-surround'
 
 " Autocomplete
-Plug 'Shougo/deoplete.nvim', { 'tag': '2.0', 'do': ':UpdateRemotePlugins' }
+Plug 'Shougo/deoplete.nvim', { 'tag': '3.0', 'do': ':UpdateRemotePlugins' }
 
 " golang plugins
 Plug 'fatih/vim-go', { 'tag': 'v1.13' }
