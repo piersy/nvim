@@ -17,6 +17,9 @@ Plug 'tpope/vim-surround'
 " Autocomplete
 Plug 'Shougo/deoplete.nvim', { 'tag': '3.0', 'do': ':UpdateRemotePlugins' }
 
+" Snippet support
+Plug 'SirVer/ultisnips'
+
 " Go sources for deoplete
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 
@@ -316,7 +319,11 @@ inoremap <C-k> <C-p>
 " Set path to gocode binary, this is recommended for performance reasons
 let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
 "}}}
-"
+
+" UtilSnip config {{{
+let g:UltiSnipsExpandTrigger="<enter>"
+"}}}
+
 " LanguageClient config {{{
 let g:LanguageClient_serverCommands = {
     \ 'javascript': ['node', '/home/piers/programs/javascript-typescript-langserver/lib/language-server-stdio'],
