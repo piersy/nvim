@@ -338,6 +338,9 @@ nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
 " Dont use the location list
 let g:go_list_type = "quickfix"
 
+"Use go imports on save
+let g:go_fmt_command = "goimports"
+
 " run :GoBuild or :GoTestCompile based on the go file
 function! s:build_go_files()
 	let l:file = expand('%')
@@ -363,7 +366,7 @@ function! ApplyVimGoMaps()
 	setlocal autowrite
 
 	" Build both test and non test files with one command
-	nnoremap <leader>b :<C-u>call <SID>build_go_files()<CR>
+	nnoremap <buffer> <leader>b :<C-u>call <SID>build_go_files()<CR>
 
 	nnoremap <buffer> <leader>t :<C-u>GoTest<CR>
 
@@ -372,9 +375,6 @@ function! ApplyVimGoMaps()
 
 	" Easy referrers
 	nnoremap <buffer> <leader>u :<C-u>GoReferrers<CR>
-
-	"Use go imports on save
-	let g:go_fmt_command = "goimports"
 
 	" make the jump to def (d for def) shortcut easier.
 	nnoremap <buffer> <leader>d :<C-u>GoDef<CR>
@@ -387,9 +387,10 @@ function! ApplyVimGoMaps()
 	nnoremap <buffer> K <C-U>
 
 	" Cycle through errors in the quickfix
-	"
-	nnoremap <C-n> :cnext<CR>
-	nnoremap <C-m> :cprevious<CR>
+	nnoremap <buffer> <C-j> :<C-u>cnext<CR>
+	nnoremap <buffer> <C-k> :<C-u>cprevious<CR>
+	" Close quickfix
+	nnoremap <buffer> <leader>k :<C-u>cclose<CR>
 	
 	" goto file in vertical split
 	nnoremap <buffer> <leader>v :<C-u>vsplit<CR>:exec("GoDef ".expand("<cword>"))<CR>
