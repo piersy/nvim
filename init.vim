@@ -294,10 +294,10 @@ let g:deoplete#enable_at_startup = 1
 
 " This stops deoplete from selecting the first option in the list
 " automatically.
-set completeopt+=noinsert,menuone
+"set completeopt+=noinsert,menuone
 
 " Disable auto popup menu
-let g:deoplete#disable_auto_complete = 1
+"let g:deoplete#disable_auto_complete = 1
 
 " Set ctrl+space to show completion menu.
 inoremap <expr><C-Space> deoplete#mappings#manual_complete()
