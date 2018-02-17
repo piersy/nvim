@@ -331,6 +331,21 @@ nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
 " Dont use the location list
 let g:go_list_type = "quickfix"
 
+" run :GoBuild or :GoTestCompile based on the go file
+function! s:build_go_files()
+	let l:file = expand('%')
+	if l:file =~# '^\f\+_test\.go$'
+		" The first parameter controls whether we jump to the first error or
+		" not, 0 jumps. The second controls whether we run or just compile, 1
+		" compiles.
+		call go#test#Test(1, 1)
+	elseif l:file =~# '^\f\+\.go$'
+		" The first parameter controls whether we jump to the first error or
+		" not, 0 jumps.
+		call go#cmd#Build(1)
+	endif
+endfunction
+
 augroup vimgo_maps
 	autocmd!
 	autocmd filetype go call ApplyVimGoMaps()
@@ -340,9 +355,10 @@ function! ApplyVimGoMaps()
 	" Automatic write on build
 	setlocal autowrite
 
-	" The exclamation mark stops the command jumping to the
-	" first error.
-	nnoremap <buffer> <leader>b :<C-u>GoBuild!<CR>
+	" Build both test and non test files with one command
+	nnoremap <leader>b :<C-u>call <SID>build_go_files()<CR>
+
+	nnoremap <buffer> <leader>t :<C-u>GoTest<CR>
 
 	" Easy doc
 	nnoremap <buffer> <leader>q :<C-u>GoDoc<CR>
@@ -364,6 +380,7 @@ function! ApplyVimGoMaps()
 	nnoremap <buffer> K <C-U>
 
 	" Cycle through errors in the quickfix
+	"
 	nnoremap <C-n> :cnext<CR>
 	nnoremap <C-m> :cprevious<CR>
 	
