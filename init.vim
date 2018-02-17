@@ -29,6 +29,9 @@ Plug 'autozimu/LanguageClient-neovim', {
 " golang plugins
 Plug 'fatih/vim-go', { 'tag': 'v1.13' }
 
+" refactoring support for go files
+Plug 'godoctor/godoctor.vim'
+
 " Nice parenthesis
 Plug 'kien/rainbow_parentheses.vim'
 
