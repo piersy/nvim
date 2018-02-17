@@ -313,6 +313,15 @@ inoremap <C-k> <C-p>
 " Set path to gocode binary, this is recommended for performance reasons
 let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
 "}}}
+"
+" LanguageClient config {{{
+let g:LanguageClient_serverCommands = {
+    \ 'javascript': ['node', '/home/piers/programs/javascript-typescript-langserver/lib/language-server-stdio'],
+    \ }
+
+" Binding for rename
+nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+"}}}
 
 " vim go config {{{
 
