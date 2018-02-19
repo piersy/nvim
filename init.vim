@@ -8,6 +8,11 @@ Plug 'tomasr/molokai'
 " Map multiple simultaneous key presses.
 Plug 'houshuang/vim-arpeggio'
 
+" Nice statusbar + open buffers displayed at top.
+Plug 'vim-airline/vim-airline'
+" vim-fugitive adds current branch display to vim-airline
+Plug 'tpope/vim-fugitive'
+
 " Syntax highlighting for solidity .sol files
 Plug 'tomlion/vim-solidity'
 
@@ -223,6 +228,11 @@ Arpeggio tnoremap <C-k> <up>
 " Toggle spell
 nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 
+" Easy buffer switching, useful with airline tab bar, since you can see where
+" you are switching to.
+nnoremap <C-u> :<C-u>bp<CR>
+nnoremap <C-i> :<C-u>bn<CR>
+
 " help buffer key mappings {{{
 " help mappings have to be set here otherwise they are overwritten with more
 " buffer specific maps
@@ -318,6 +328,17 @@ inoremap <C-k> <C-p>
 
 " Set path to gocode binary, this is recommended for performance reasons
 let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
+"}}}
+
+" airline config {{{
+
+" Set use nice fonts for airline
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+" need to set dict before setting any symbols
+let g:airline_symbols = {}
+let g:airline_symbols.maxlinenr = ''
+let g:airline#extensions#tabline#formatter = 'unique_tail'
 "}}}
 
 " UtilSnip config {{{
