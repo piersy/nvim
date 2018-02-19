@@ -350,6 +350,10 @@ let g:LanguageClient_serverCommands = {
     \ 'javascript': ['node', '/home/piers/programs/javascript-typescript-langserver/lib/language-server-stdio'],
     \ }
 
+" Unfortunately this seems to conflict with deoplete and causes the completion
+" menu to update while cycling through completions.
+"    \ 'go': ['go-langserver'],
+	
 " Binding for rename
 nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
 "}}}
