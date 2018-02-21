@@ -12,6 +12,8 @@ Plug 'houshuang/vim-arpeggio'
 Plug 'vim-airline/vim-airline'
 " vim-fugitive adds current branch display to vim-airline
 Plug 'tpope/vim-fugitive'
+" gitv adds gitk style git log browsing to vim it is a fugitive extension
+Plug 'gregsexton/gitv', {'on': ['Gitv']}
 
 " Syntax highlighting for solidity .sol files
 Plug 'tomlion/vim-solidity'
