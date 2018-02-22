@@ -368,6 +368,9 @@ let g:go_list_type = "quickfix"
 "Use go imports on save
 let g:go_fmt_command = "goimports"
 
+" Exclude protobuf generated files from metalinter.
+let g:go_metalinter_excludes = [".*\.pb\.go"]
+
 " run :GoBuild or :GoTestCompile based on the go file
 function! s:build_go_files()
 	let l:file = expand('%')
