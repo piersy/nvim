@@ -183,7 +183,26 @@ function! ZoomToggle()
 endfunction
 
 nnoremap <leader>s :<C-u>write<CR>
-nnoremap <leader>c :<C-u>quit<CR>
+
+" Deletes the current buffer or quits if this is the last buffer.
+function! CloseBufferOrQuit()
+	" These are buffers that have a non empty name and are listed in the
+	" bufferlist.
+	let currentbuffers = filter(range(1, bufnr('$')), '! empty(bufname(v:val)) && buflisted(v:val)')
+	"If there is only one buffer then quit.
+	if len(currentbuffers) == 1
+		quit
+	else
+		"Otherwise delete that buffer.
+		bdelete
+	endif
+endfunction
+
+" Auto close when last buffer deleted - Unfortunately this messes with
+" PlugInstall so I need to just move this functionality into a function that I
+" map to <leader>c
+"autocmd BufDelete * if len(filter(range(1, bufnr('$')), '! empty(bufname(v:val)) && buflisted(v:val)')) == 1 | quit | endif
+nnoremap <leader>c :<C-u>call CloseBufferOrQuit()<CR>
 nnoremap <leader>C :<C-u>quit!<CR>
 
 " Arpeggio standard vim key mappings.
@@ -231,9 +250,10 @@ Arpeggio tnoremap <C-k> <up>
 nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 
 " Easy buffer switching, useful with airline tab bar, since you can see where
-" you are switching to.
-nnoremap <C-u> :<C-u>bp<CR>
-nnoremap <C-i> :<C-u>bn<CR>
+" you are switching to. The exclamation mark stops closed buffers being
+" re-opened.
+nnoremap <C-u> :<C-u>bp!<CR>
+nnoremap <C-i> :<C-u>bn!<CR>
 
 " help buffer key mappings {{{
 " help mappings have to be set here otherwise they are overwritten with more
