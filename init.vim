@@ -37,7 +37,7 @@ Plug 'autozimu/LanguageClient-neovim', {
     \ }
 
 " golang plugins
-Plug 'fatih/vim-go', { 'tag': 'v1.13' }
+Plug 'fatih/vim-go', { 'tag': 'v1.16' }
 
 " refactoring support for go files
 Plug 'godoctor/godoctor.vim'
@@ -45,10 +45,24 @@ Plug 'godoctor/godoctor.vim'
 " Nice parenthesis
 Plug 'kien/rainbow_parentheses.vim'
 
+"Plug 'Shougo/denite.nvim', { 'tag': 'support-python-3.4' }
+
+" Vim overlooks the need to close a buffer without closing a window, this
+" plugin provides that functionality. I want this specifically so that if I
+" have a window open with a buffer and the quickfix open as well, when I close
+" the main buffer I do not want a fullscreen quickfix.
+Plug 'moll/vim-bbye'
+
+" fzf plugin from the fzf repo at that location
+Plug '/home/piers/programs/fzf'
+" the fzf vim plugin which depends on the fzf plugin
+Plug 'junegunn/fzf.vim'
+
 " Add plugins to &runtimepath.
 call plug#end()
 "}}}
-
+"let g:python3_host_prog="/usr/local/bin/python3.5"
+"let g:python3_host_prog = "/usr/local/bin/python3.5"
 " Arpeggio needs to be loaded as the init.vim is parsed so that
 " it can be used for defining key mappings.
 call arpeggio#load()
@@ -93,6 +107,18 @@ set showcmd
 
 " allow folding using '{{{' and '}}}'
 set foldmethod=marker
+
+" vim will automatially detect changes to files on disk and load them, if you
+" have made changes in vim as well then vim will ask before loading the
+" changes.
+set autoread
+
+" Auto open quickfix window after running grep
+autocmd QuickFixCmdPost *grep* cwindow
+
+" Position quickfix window at bottom of screen and take whole width. qf is the
+" quickfix filetype
+au FileType qf wincmd J
 "}}}
 
 " generic vim key mappings {{{
@@ -126,8 +152,9 @@ vnoremap M :Man <C-R><C-W> <CR>
 cnoremap <C-j> <Down>
 cnoremap <C-k> <Up>
 
-" I dont ever place marks so I use 'm' as the leader.
-let mapleader = 'm'
+" Space key does nothing in insert, it is also easily reachable from both
+" hands.
+let mapleader = ' '
 
 " Allow easy editing of init.vim file.
 nnoremap <leader>ve :vsplit $MYVIMRC<CR>
@@ -142,6 +169,7 @@ nnoremap <leader>vs :write $MYVIMRC<CR>:source $MYVIMRC<CR>
 " we need to do something different, I'd suggest opening the explore at the
 " same dir that the terminal is in.
 nnoremap <leader>e :call MyExplore()<CR>
+
 " if the file is not a terminal then use normal explore
 " otherwise explore the cwd.
 function! MyExplore()
@@ -152,9 +180,6 @@ function! MyExplore()
 		:Explore
 	endif
 endfunction
-
-nnoremap <leader>wh :Hexplore<CR>
-nnoremap <leader>wv :Vexplore<CR>
 
 augroup netrw_maps
 	autocmd!
@@ -182,28 +207,53 @@ function! ZoomToggle()
 	endif
 endfunction
 
+" Command to save as sudo
+command WRITE execute "w !sudo tee %"
+
 nnoremap <leader>s :<C-u>write<CR>
+nnoremap <leader>S :<C-u>WRITE<CR>
 
 " Deletes the current buffer or quits if this is the last buffer.
 function! CloseBufferOrQuit()
-	" These are buffers that have a non empty name and are listed in the
-	" bufferlist.
-	let currentbuffers = filter(range(1, bufnr('$')), '! empty(bufname(v:val)) && buflisted(v:val)')
-	"If there is only one buffer then quit.
-	if len(currentbuffers) == 1
-		quit
+
+	" This config lead to buffers with no name being ignored, so starting vim
+	" without any arguments and then pressing <leader>c resulted in no effect
+	"let currentbuffers = filter(range(1, bufnr('$')), '! empty(bufname(v:val)) && buflisted(v:val)')
+	
+	" This config at least solves the above issue
+	let currentbuffers = filter(range(1, bufnr('$')), 'buflisted(v:val)')
+	" Im not really sure what type of buffer would have an empty bufname
+	" let currentbuffers = filter(range(1, bufnr('$')), '! empty(bufname(v:val))')
+	
+	" echom join(currentbuffers, ":")
+	
+	" If there is only one visible buffer left and it is current  then quit.
+	" The check to see if the buffer is current prevents us quitting when
+	" closing help with one other buffer open, since help is not listed for
+	" some reason.
+	if len(currentbuffers) <= 1 && index(currentbuffers, bufnr('%')) >= 0
+		"echom "quitting"
+		quitall
 	else
 		"Otherwise delete that buffer.
-		bdelete
+		"echom "deleting buffer"
+		if &buftype ==# ""
+			"If this is a normal window dont delete the associated window 
+			Bdelete
+		else 
+			" else delete the buffer and window (for example this would apply
+			" to the quickfix window)
+			bdelete
+		endif
 	endif
 endfunction
 
-" Auto close when last buffer deleted - Unfortunately this messes with
-" PlugInstall so I need to just move this functionality into a function that I
-" map to <leader>c
-"autocmd BufDelete * if len(filter(range(1, bufnr('$')), '! empty(bufname(v:val)) && buflisted(v:val)')) == 1 | quit | endif
 nnoremap <leader>c :<C-u>call CloseBufferOrQuit()<CR>
-nnoremap <leader>C :<C-u>quit!<CR>
+nnoremap <leader>C :<C-u>quitall!<CR>
+
+nnoremap <leader>w :<C-u>vsplit<CR>
+nnoremap <leader>k :<C-u>close<CR>
+
 
 " Arpeggio standard vim key mappings.
 Arpeggio nnoremap fk :wincmd k <CR>
@@ -217,6 +267,8 @@ Arpeggio inoremap df <esc>
 Arpeggio cnoremap df <C-c>
 " Make esc in normal mode clear highlighting.
 Arpeggio noremap <silent> df :<C-u>nohlsearch<CR><esc>
+" Map df to the equivalent of escape for terminal.
+Arpeggio tnoremap <silent> df :<C-u>nohlsearch<CR><esc>
 
 " Map fn to equivalient of escape in terminal mode. We can't map df here
 " otherwise when we have vim inside a terminal in vim and we escape the df
@@ -224,7 +276,7 @@ Arpeggio noremap <silent> df :<C-u>nohlsearch<CR><esc>
 " terminal. We also add a search back to first line starting with a dollar
 " then remove search highlighting. This stops the cursor appearing at the
 " bottom when we escape.
-Arpeggio tnoremap fn <C-\><C-n>G?^\$<CR>:<C-u>nohlsearch<CR>
+"Arpeggio tnoremap fn <C-\><C-n>G?^\$<CR>:<C-u>nohlsearch<CR>
 
 " Remove the original esc key functionality.
 inoremap <esc> <NOP>
@@ -238,7 +290,7 @@ Arpeggio nnoremap jk <CR>
 
 " As with esc we have to map fj instead of jk so that when using vim inside a
 " terminal in vim we do not trigger the <CR>  of the terminal.
-Arpeggio tnoremap fj <CR>
+"Arpeggio tnoremap fj <CR>
 
 " Remove the original <CR> key functionality.
 inoremap <CR> <NOP>
@@ -253,7 +305,10 @@ nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 " you are switching to. The exclamation mark stops closed buffers being
 " re-opened.
 nnoremap <C-u> :<C-u>bp!<CR>
-nnoremap <C-i> :<C-u>bn!<CR>
+nnoremap <C-p> :<C-u>bn!<CR>
+
+" Easy quickfix closing
+nnoremap <leader>m :<C-u>cclose<CR>
 
 " help buffer key mappings {{{
 " help mappings have to be set here otherwise they are overwritten with more
@@ -354,13 +409,24 @@ let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
 
 " airline config {{{
 
+" Enable the tabline
+let g:airline#extensions#tabline#enabled = 1
+
+" Set airline to sow a tabline with oipen buffers in a single tab
+let g:airline#extensions#tabline#show_buffers = 1
+
 " Set use nice fonts for airline
 let g:airline_powerline_fonts = 1
-let g:airline#extensions#tabline#enabled = 1
+
 " need to set dict before setting any symbols
 let g:airline_symbols = {}
+" simply set this symbol to nothing since it was displaying strangely
 let g:airline_symbols.maxlinenr = ''
-let g:airline#extensions#tabline#formatter = 'unique_tail'
+
+" format the filenames in the tabbar to be filename only, the full path is
+" show in the statusline at the bottom.
+let g:airline#extensions#tabline#fnamemod = ':t'
+
 "}}}
 
 " UtilSnip config {{{
@@ -370,6 +436,8 @@ let g:UltiSnipsExpandTrigger="<enter>"
 " LanguageClient config {{{
 let g:LanguageClient_serverCommands = {
     \ 'javascript': ['node', '/home/piers/programs/javascript-typescript-langserver/lib/language-server-stdio'],
+    \ 'cpp': ['cquery', '--log-file=/tmp/cq.log'],
+    \ 'c': ['cquery', '--log-file=/tmp/cq.log'],
     \ }
 
 " Unfortunately this seems to conflict with deoplete and causes the completion
@@ -377,10 +445,14 @@ let g:LanguageClient_serverCommands = {
 "    \ 'go': ['go-langserver'],
 	
 " Binding for rename
+nnoremap <silent> gh :call LanguageClient#textDocument_hover()<CR>
+nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
+nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
+nnoremap <silent> gs :call LanguageClient#textDocument_documentSymbol()<CR>
 nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
 "}}}
 
-" vim go config {{{
+" vim-go config {{{
 
 " Dont use the location list
 let g:go_list_type = "quickfix"
@@ -390,6 +462,9 @@ let g:go_fmt_command = "goimports"
 
 " Exclude protobuf generated files from metalinter.
 let g:go_metalinter_excludes = [".*\.pb\.go"]
+
+" Use local godoc server
+let g:go_doc_url = 'http://localhost:6060'
 
 " run :GoBuild or :GoTestCompile based on the go file
 function! s:build_go_files()
@@ -432,6 +507,9 @@ function! ApplyVimGoMaps()
 	" make the return to start (r for return) shortcut easier.
 	nnoremap <buffer> <leader>r :<C-u>GoDefPop<CR>
 
+	" make the go alternate shortcut easier.
+	nnoremap <buffer> <leader>a :<C-u>GoAlternate<CR>
+
 	" Map K again in buffer specific mode since it is mapped by go
 	" to get the doc.
 	nnoremap <buffer> K <C-U>
@@ -439,8 +517,6 @@ function! ApplyVimGoMaps()
 	" Cycle through errors in the quickfix
 	nnoremap <buffer> <C-j> :<C-u>cnext<CR>
 	nnoremap <buffer> <C-k> :<C-u>cprevious<CR>
-	" Close quickfix
-	nnoremap <buffer> <leader>k :<C-u>cclose<CR>
 	
 	" goto file in vertical split
 	nnoremap <buffer> <leader>v :<C-u>vsplit<CR>:exec("GoDef ".expand("<cword>"))<CR>
@@ -454,7 +530,6 @@ let g:rbpt_max = 16
 let g:rbpt_loadcmd_toggle = 0
 let g:rbpt_colorpairs = [
     \ ['brown',       'RoyalBlue3'],
-    \ ['Darkblue',    'SeaGreen3'],
     \ ['darkgray',    'DarkOrchid3'],
     \ ['darkgreen',   'firebrick3'],
     \ ['darkcyan',    'RoyalBlue3'],
@@ -468,6 +543,9 @@ let g:rbpt_colorpairs = [
     \ ['darkred',     'DarkOrchid3'],
     \ ['red',         'firebrick3'],
     \ ]
+" removed colors
+"
+"\ ['Darkblue',    'SeaGreen3'],
 
 au VimEnter * RainbowParenthesesToggle
 au Syntax * RainbowParenthesesLoadRound
@@ -476,3 +554,56 @@ au Syntax * RainbowParenthesesLoadBraces
 "au Syntax * RainbowParenthesesLoadChevrons
 " }}}
 
+"denite config {{{
+"call denite#custom#map(
+"			\ 'insert',
+"			\ '<C-j>',
+"			\ '<denite:move_to_next_line>',
+"			\ 'noremap'
+"			\)
+"call denite#custom#map(
+"			\ 'insert',
+"			\ '<C-k>',
+"			\ '<denite:move_to_previous_line>',
+"			\ 'noremap'
+"			\)
+"nnoremap <leader>g :<C-u>Denite grep<CR>
+"" }}}
+
+"fzf config {{{
+
+nnoremap <leader>o :<C-u>:Files<CR>
+
+" FZF with ripgrep FTW!!!
+" --column: Show column number
+" --line-number: Show line number
+" --no-heading: Do not show file headings in results
+" --fixed-strings: Search term as a literal string
+" --ignore-case: Case insensitive search
+" --no-ignore: Do not respect .gitignore, etc...
+" --hidden: Search hidden files and folders
+" --follow: Follow symlinks
+" --glob: Additional conditions for search (in this case ignore everything in the .git/ folder)
+" --color: Search color options
+"command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1, <bang>0)
+
+command! -bang -nargs=* Find
+ \ call fzf#vim#grep(
+ \   'rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \   <bang>0)
+set grepprg=rg\ --vimgrep
+
+nnoremap <leader>f :<C-u>:Find<CR>
+
+
+" Similarly, we can apply it to fzf#vim#grep. To use ripgrep instead of ag:
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \   <bang>0)
+
+"}}}
