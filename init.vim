@@ -301,14 +301,25 @@ Arpeggio tnoremap <C-k> <up>
 " Toggle spell
 nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 
+augroup unlisted_buffers
+    autocmd!
+    autocmd FileType qf set nobuflisted
+augroup END
+
 " Easy buffer switching, useful with airline tab bar, since you can see where
 " you are switching to. The exclamation mark stops closed buffers being
 " re-opened.
-nnoremap <C-u> :<C-u>bp!<CR>
-nnoremap <C-p> :<C-u>bn!<CR>
+nnoremap <C-u> :<C-u>bp<CR>
+nnoremap <C-p> :<C-u>bn<CR>
 
 " Easy quickfix closing
-nnoremap <leader>m :<C-u>cclose<CR>
+nnoremap <leader><Space> :<C-u>cclose<CR>
+
+" Remap b for split keyboard
+nnoremap m b
+nnoremap M B
+vnoremap m b
+vnoremap M B
 
 " help buffer key mappings {{{
 " help mappings have to be set here otherwise they are overwritten with more
