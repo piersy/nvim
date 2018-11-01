@@ -253,6 +253,9 @@ nnoremap <leader>C :<C-u>quitall!<CR>
 
 nnoremap <leader>w :<C-u>vsplit<CR>
 nnoremap <leader>k :<C-u>close<CR>
+nnoremap <leader>i gq
+vnoremap <leader>i gq
+
 
 
 " Arpeggio standard vim key mappings.
@@ -529,11 +532,6 @@ function! ApplyVimGoMaps()
 	nnoremap <buffer> <C-j> :<C-u>cnext<CR>
 	nnoremap <buffer> <C-k> :<C-u>cprevious<CR>
 	
-	" goto file in vertical split
-	nnoremap <buffer> <leader>v :<C-u>vsplit<CR>:exec("GoDef ".expand("<cword>"))<CR>
-	" goto file in horizontal split
-	nnoremap <buffer> <leader>h :<C-u>split<CR>:exec("GoDef ".expand("<cword>"))<CR>
-
 endfunction "}}}
 
 "rainbow parenthesis config {{{
