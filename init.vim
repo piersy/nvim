@@ -273,10 +273,16 @@ Arpeggio tnoremap <C-k> <up>
 " Toggle spell
 nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 
-" set quickfix to be unlisted so that bn and bp do not navigate to it.
+" set quickfix and previewwindow to be unlisted so that bn and bp do not
+" navigate to it and so that when I exit these windows do not stop vim from
+" closing. 
 augroup unlisted_buffers
-    autocmd!
-    autocmd FileType qf set nobuflisted
+	autocmd!
+	" So we have to use 2 completely different ways of setting options for
+	" these windows, don't ask me why but that is just the way that vim does
+	" it.
+	autocmd FileType qf set nobuflisted
+	autocmd WinEnter * if &previewwindow | set nobuflisted | endif
 augroup END
 
 " Easy buffer switching, useful with airline tab bar, since you can see where
