@@ -249,7 +249,7 @@ function! CloseBufferOrQuit()
 endfunction
 
 nnoremap <leader>c :<C-u>call CloseBufferOrQuit()<CR>
-nnoremap <leader>C :<C-u>quitall!<CR>
+nnoremap <leader>Q :<C-u>quitall!<CR>
 
 nnoremap <leader>w :<C-u>vsplit<CR>
 nnoremap <leader>k :<C-u>close<CR>
@@ -304,19 +304,31 @@ Arpeggio tnoremap <C-k> <up>
 " Toggle spell
 nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 
+" set quickfix to be unlisted so that bn and bp do not navigate to it.
 augroup unlisted_buffers
     autocmd!
     autocmd FileType qf set nobuflisted
 augroup END
 
 " Easy buffer switching, useful with airline tab bar, since you can see where
-" you are switching to. The exclamation mark stops closed buffers being
-" re-opened.
+" you are switching to.
 nnoremap <C-u> :<C-u>bp<CR>
 nnoremap <C-p> :<C-u>bn<CR>
 
+function QFixToggle()
+	if exists("g:qfix_win")
+		cclose
+		unlet g:qfix_win
+	else
+		let curr_win = winnr()
+		copen
+		let g:qfix_win = bufnr("$")
+		:execute curr_win . "wincmd w"
+	endif
+endfunction
+
 " Easy quickfix closing
-nnoremap <leader><Space> :<C-u>cclose<CR>
+nnoremap <leader><Space> :<C-u>call QFixToggle()<CR>
 
 " Remap b for split keyboard
 nnoremap m b
