@@ -74,6 +74,7 @@ colorscheme molokai
 " Work around for broken xfce4-terminal stops garbage characters being printed
 " in neovim 0.2.2+
 set guicursor=
+
 " generic vim options {{{
 
 " Permanently display line numbers at the side of the screen.
@@ -161,38 +162,6 @@ nnoremap <leader>ve :vsplit $MYVIMRC<CR>
 " Allow easy sourcing of init.vim file.
 nnoremap <leader>vs :write $MYVIMRC<CR>:source $MYVIMRC<CR>
 
-" netrw buffer key mappings {{{
-" Allow easy window opening.
-
-" This needs to be updated for terminal use, Explore expects
-" the current file name to be a file, for terminals it is not a file name so
-" we need to do something different, I'd suggest opening the explore at the
-" same dir that the terminal is in.
-nnoremap <leader>e :call MyExplore()<CR>
-
-" if the file is not a terminal then use normal explore
-" otherwise explore the cwd.
-function! MyExplore()
-	let l:fname = expand("%")
-	if l:fname =~ "^term:\/\/"
-		:execute ":Explore" getcwd()
-	else
-		:Explore
-	endif
-endfunction
-
-augroup netrw_maps
-	autocmd!
-	autocmd filetype netrw call ApplyNetrwMaps()
-augroup END
-
-function! ApplyNetrwMaps()
-	nnoremap <buffer> <leader>c :<C-u>quit<CR>
-	" In this case netrw has mapped <CR> to some other command
-	" so we need a recursive mapping.
-	Arpeggio nmap <buffer> jk <CR>
-endfunction
-"}}}
 
 " Allow easy zooming of current window.
 nnoremap <leader>z :call ZoomToggle()<CR>
@@ -366,6 +335,39 @@ function! <SID>StripTrailingWhitespaces()
     %s/\s\+$//e
     call cursor(l, c)
 endfun
+"}}}
+
+" netrw buffer key mappings {{{
+" Allow easy window opening.
+
+" This needs to be updated for terminal use, Explore expects
+" the current file name to be a file, for terminals it is not a file name so
+" we need to do something different, I'd suggest opening the explore at the
+" same dir that the terminal is in.
+nnoremap <leader>e :call MyExplore()<CR>
+
+" if the file is not a terminal then use normal explore
+" otherwise explore the cwd.
+function! MyExplore()
+	let l:fname = expand("%")
+	if l:fname =~ "^term:\/\/"
+		:execute ":Explore" getcwd()
+	else
+		:Explore
+	endif
+endfunction
+
+augroup netrw_maps
+	autocmd!
+	autocmd filetype netrw call ApplyNetrwMaps()
+augroup END
+
+function! ApplyNetrwMaps()
+	nnoremap <buffer> <leader>c :<C-u>quit<CR>
+	" In this case netrw has mapped <CR> to some other command
+	" so we need a recursive mapping.
+	Arpeggio nmap <buffer> jk <CR>
+endfunction
 "}}}
 
 " yaml file type config {{{
