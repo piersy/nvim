@@ -156,6 +156,8 @@ cnoremap <C-k> <Up>
 " Space key does nothing in insert, it is also easily reachable from both
 " hands.
 let mapleader = ' '
+" Remove the normal space function in normal mode
+noremap <Space> <NOP>
 
 " Allow easy editing of init.vim file.
 nnoremap <leader>ve :vsplit $MYVIMRC<CR>
@@ -222,7 +224,7 @@ nnoremap <leader>Q :<C-u>quitall!<CR>
 
 nnoremap <leader>w :<C-u>vsplit<CR>
 nnoremap <leader>k :<C-u>close<CR>
-nnoremap <leader>i gq
+nnoremap <leader>i gqk
 vnoremap <leader>i gq
 
 
@@ -551,6 +553,8 @@ function! ApplyVimGoMaps()
 	" Cycle through errors in the quickfix
 	nnoremap <buffer> <C-j> :<C-u>cnext<CR>
 	nnoremap <buffer> <C-k> :<C-u>cprevious<CR>
+
+	inoremap <buffer> kl <ESC> :<C-u>call <SID>build_go_files()<CR>
 	
 endfunction "}}}
 
