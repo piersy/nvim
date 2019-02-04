@@ -266,8 +266,11 @@ Arpeggio nnoremap jk <CR>
 " terminal in vim we do not trigger the <CR>  of the terminal.
 "Arpeggio tnoremap fj <CR>
 
-" Remove the original <CR> key functionality.
-inoremap <CR> <NOP>
+" Remove the original <CR> key functionality. But not in insert mode since I
+" want to use it for UltiSnips. And not in command mode, since it is useful
+" for entering commands after using the direction keys.
+nnoremap <CR> <NOP>
+vnoremap <CR> <NOP>
 
 Arpeggio tnoremap <C-j> <down>
 Arpeggio tnoremap <C-k> <up>
@@ -466,7 +469,9 @@ let g:airline#extensions#tabline#fnamemod = ':t'
 "}}}
 
 " UtilSnip config {{{
-let g:UltiSnipsExpandTrigger="<enter>"
+let g:UltiSnipsExpandTrigger="<CR>"
+let g:UltiSnipsJumpForwardTrigger="<CR>"
+let g:UltiSnipsJumpBackwardTrigger="<C-H>"
 "}}}
 
 " LanguageClient config {{{
