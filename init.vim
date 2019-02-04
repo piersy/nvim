@@ -477,20 +477,27 @@ let g:UltiSnipsJumpBackwardTrigger="<C-H>"
 " LanguageClient config {{{
 let g:LanguageClient_serverCommands = {
     \ 'javascript': ['node', '/home/piers/programs/javascript-typescript-langserver/lib/language-server-stdio'],
-    \ 'cpp': ['cquery', '--log-file=/tmp/cq.log'],
-    \ 'c': ['cquery', '--log-file=/tmp/cq.log'],
+    \ 'cpp': ['/home/piers/projects/cquery/build/release/bin/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
+    \ 'c': ['/home/piers/projects/cquery/build/release/bin/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
     \ }
 
 " Unfortunately this seems to conflict with deoplete and causes the completion
 " menu to update while cycling through completions.
 "    \ 'go': ['go-langserver'],
 	
-" Binding for rename
-nnoremap <silent> gh :call LanguageClient#textDocument_hover()<CR>
-nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
-nnoremap <silent> gr :call LanguageClient#textDocument_references()<CR>
-nnoremap <silent> gs :call LanguageClient#textDocument_documentSymbol()<CR>
-nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+
+augroup language_client_maps
+	autocmd!
+	autocmd filetype c,cpp,javascript call ApplyLanguageClientMaps()
+augroup END
+
+function! ApplyLanguageClientMaps()
+	nnoremap <silent> <buffer> <leader>d :<C-u>call LanguageClient#textDocument_definition()<CR>
+	nnoremap <silent> <buffer> <leader>h :<C-u>call LanguageClient#textDocument_hover()<CR>
+	nnoremap <silent> <buffer> <leader>u :<C-u>call LanguageClient#textDocument_references()<CR>
+	nnoremap <silent> <buffer> <leader>; :<C-u>call LanguageClient#textDocument_documentSymbol()<CR>
+	nnoremap <silent> <buffer> <leader>r :<C-u>call LanguageClient_textDocument_rename()<CR>
+endfunction
 "}}}
 
 " vim-go config {{{
