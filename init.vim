@@ -644,4 +644,33 @@ command! -bang -nargs=* Rg
   \           : fzf#vim#with_preview('right:50%:hidden', '?'),
   \   <bang>0)
 
+" find tags (functions/variables...) in files
+"
+command! -bang FindTags
+  \ call fzf#vim#buffer_tags(<q-args>,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \   <bang>0)
+
+" fzf#vim#with_preview is a function that generates an option string. Running
+" echo fzf#vim#with_preview('right:50%:hidden', '?') shows you that string
+" which is what I have have done in this case and then edited it further.
+"
+" The original is below, I have edited it to make sure the preview shows the
+" current buffer only instead of trying to look up the current entry denoted
+" by {} as if it were a file.
+" {'options': ['--preview-window', 'right:50%:hidden', '--preview', '''/home/piers/.config/nvim/plugged/fzf.vim/bin/preview.rb'' {}', '--bind', '?:toggle-preview']}
+" The problem I'm facing here is that we need to feed filename:linenum:colnum
+" into preview.rb and that means updating the code for fzf#vim#buffer_tags to
+" output this to output this info.
+
+"let prevopts = {'options': ['--preview-window', 'right:50%:hidden', '--preview', '''/home/piers/.config/nvim/plugged/fzf.vim/bin/preview.rb'' '.bufname("%"), '--bind', '?:toggle-preview'] }
+
+"let prevopts = {'options': ['--preview-window', 'right:50%:hidden', '--preview', '''/home/piers/.config/nvim/plugged/fzf.vim/bin/preview.rb'' {}', '--bind', '?:toggle-preview']}
+"command! -nargs=* -bang FindTags call fzf#vim#buffer_tags(<q-args>,prevopts,<bang>0)
+"
+"echo substitute('xxx:yyy:bbb', '.\{-}:', '', '')
+"command! -nargs=* -bang FindTags call fzf#vim#buffer_tags(<q-args>,{'options': ['--preview-window', 'right:50%', '--preview', '''/home/piers/.config/nvim/plugged/fzf.vim/bin/preview.rb'' '.bufname("%").substitute('{}', '', '', ''), '--bind', '?:toggle-preview'] },<bang>0)
+"command! -nargs=* -bang FindTags call fzf#vim#buffer_tags(<q-args>,{'options': ['--preview-window', 'right:50%', '--preview', '''/home/piers/.config/nvim/plugged/fzf.vim/bin/preview.rb'' '.bufname("%").substitute('{}', '.\{-}:', '', ''), '--bind', '?:toggle-preview'] },<bang>0)
+"
 "}}}
