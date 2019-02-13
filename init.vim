@@ -296,13 +296,12 @@ nnoremap <C-u> :<C-u>bp<CR>
 nnoremap <C-p> :<C-u>bn<CR>
 
 function QFixToggle()
-	if exists("g:qfix_win")
+	let qf = filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") == "qf"')
+	if len(qf) > 0
 		cclose
-		unlet g:qfix_win
 	else
 		let curr_win = winnr()
 		copen
-		let g:qfix_win = bufnr("$")
 		:execute curr_win . "wincmd w"
 	endif
 endfunction
