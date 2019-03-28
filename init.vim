@@ -240,6 +240,12 @@ Arpeggio nnoremap fl :wincmd l <CR>
 
 " Map df to esc - no brainer.
 Arpeggio inoremap df <esc>
+
+" If I could map DF to <esc> followed by disabling caps then I would, but vim
+" cannot detect caps lock! So it is safer to not have this mapping and just
+" mess up in insert mode a bit.
+" Arpeggio inoremap DF <esc>
+
 " Map df to the equivalent of escape for commandline.
 Arpeggio cnoremap df <C-c>
 " Make esc in normal mode clear highlighting.
@@ -529,6 +535,9 @@ let g:go_metalinter_excludes = [".*\.pb\.go"]
 
 " Use local godoc server
 let g:go_doc_url = 'http://localhost:6060'
+
+" Increase timeout
+let g:go_test_timeout = '20s'
 
 " run :GoBuild or :GoTestCompile based on the go file
 function! s:build_go_files()
