@@ -475,10 +475,11 @@ let g:UltiSnipsJumpBackwardTrigger="<C-H>"
 
 " LanguageClient config {{{
 let g:LanguageClient_serverCommands = {
-    \ 'javascript': ['node', '/home/piers/programs/javascript-typescript-langserver/lib/language-server-stdio'],
+\ 'javascript': ['node', '/home/piers/programs/javascript-typescript-langserver/lib/language-server-stdio', '-l', 'logggg'],
     \ 'cpp': ['/home/piers/projects/cquery/build/release/bin/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
     \ 'c': ['/home/piers/projects/cquery/build/release/bin/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
     \ }
+
 
 " Unfortunately this seems to conflict with deoplete and causes the completion
 " menu to update while cycling through completions.
