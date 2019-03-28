@@ -22,7 +22,10 @@ Plug 'tomlion/vim-solidity'
 Plug 'tpope/vim-surround'
 
 " Autocomplete
-Plug 'Shougo/deoplete.nvim', { 'tag': '3.0', 'do': ':UpdateRemotePlugins' }
+Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
+
+" Add automatic parentheses to completion (only works with deoplete)
+Plug 'Shougo/neopairs.vim'
 
 " Snippet support
 Plug 'SirVer/ultisnips'
@@ -42,7 +45,7 @@ Plug 'fatih/vim-go', { 'tag': 'v1.16' }
 " refactoring support for go files
 Plug 'godoctor/godoctor.vim'
 
-" Nice parenthesis
+" Nice parentheses
 Plug 'kien/rainbow_parentheses.vim'
 
 "Plug 'Shougo/denite.nvim', { 'tag': 'support-python-3.4' }
@@ -440,7 +443,16 @@ let g:deoplete#auto_complete_start_length = 1
 
 " ignore the around source which adds random complete words from around the
 " cursor into the complete options, this is for a later version
-"call deoplete#custom#option('ignore_sources', { '_': ['around'] })
+call deoplete#custom#option({
+\ 'ignore_sources': { '_': ['around'] },
+\ 'refresh_always': v:false, 
+\ 'camel_case'    : v:true,
+\ 'min_pattern_length' : 1,
+\})
+
+" Auto insert parentheses
+let g:neopairs#enable = 1
+call deoplete#custom#source('_', 'converters', ['converter_auto_paren'])
 
 " This stops deoplete from selecting the first option in the list
 " automatically.
@@ -462,7 +474,6 @@ inoremap <expr>. pumvisible() ? "\<C-n>." : "."
 "}}}
 
 " deoplete go config {{{
-
 " Set path to gocode binary, this is recommended for performance reasons
 let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
 "}}}
