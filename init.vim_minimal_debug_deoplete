@@ -1,41 +1,19 @@
+" plugins {{{
 call plug#begin()
+" Make sure you use single quotes.
 
-"Plug 'nsf/gocode'
-Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-Plug 'zchee/deoplete-go', { 'do': 'make'}
+" Autocomplete
+Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
+
+" Add plugins to &runtimepath.
 call plug#end()
+"}}}
 
+" deoplete config {{{
 
-
-" To disable a plugin, add it's bundle name to the following list
-syntax on
-filetype plugin indent on
-
-" deoplete config
-" This stops deoplete from selecting the first option in the list
-" automatically.
-set completeopt+=noinsert,menuone
 " enable deoplete
 let g:deoplete#enable_at_startup = 1
-" disable autocomplete
-let g:deoplete#disable_auto_complete = 1
-"if has("gui_running")
-"    inoremap <silent><expr> <Nul> deoplete#mappings#manual_complete()
-"else
-"    inoremap <silent><expr> <C-@> deoplete#mappings#manual_complete()
-"endif
-"let g:deoplete#enable_profile = 1
-"call deoplete#custom#set('jedi', 'debug_enabled', 1)
-"call deoplete#enable_logging('DEBUG', 'deoplete.log')
-"
-"
 
-inoremap <silent><expr> <TAB>
-\ pumvisible() ? "\<C-n>" :
-\ <SID>check_back_space() ? "\<TAB>" :
-\ deoplete#mappings#manual_complete()
-function! s:check_back_space() abort "{{{
-let col = col('.') - 1
-return !col || getline('.')[col - 1]  =~ '\s'
-endfunction"}}}
+"}}}
+
+
