@@ -58,6 +58,9 @@ Plug '/home/piers/programs/fzf'
 " the fzf vim plugin which depends on the fzf plugin
 Plug 'junegunn/fzf.vim'
 
+" fixes the ':w !sudo tee %' problem in neovim with ':w suda://%'
+Plug 'lambdalisue/suda.vim'
+
 " Add plugins to &runtimepath.
 call plug#end()
 "}}}
