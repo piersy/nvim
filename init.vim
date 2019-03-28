@@ -260,8 +260,9 @@ inoremap <esc> <NOP>
 cnoremap <esc> <NOP>
 noremap <esc> <NOP>
 
-" Map jk to <CR> for insert and commandline mode.
-Arpeggio inoremap jk <CR>
+" Map jk to <CR> for insert and commandline mode. And also make it insert
+" entries from autocomplete.
+Arpeggio inoremap <expr>jk pumvisible() ? "\<C-n>" : "<CR>"
 Arpeggio cnoremap jk <CR>
 Arpeggio nnoremap jk <CR>
 
@@ -426,6 +427,15 @@ endfunction
 " enable deoplete
 let g:deoplete#enable_at_startup = 1
 
+" case insensitive search untill capital is entered
+let g:deoplete#enable_smart_case = 1
+
+let g:deoplete#auto_complete_start_length = 1
+
+" ignore the around source which adds random complete words from around the
+" cursor into the complete options, this is for a later version
+"call deoplete#custom#option('ignore_sources', { '_': ['around'] })
+
 " This stops deoplete from selecting the first option in the list
 " automatically.
 "set completeopt+=noinsert,menuone
@@ -434,11 +444,14 @@ let g:deoplete#enable_at_startup = 1
 "let g:deoplete#disable_auto_complete = 1
 
 " Set ctrl+space to show completion menu.
-inoremap <expr><C-Space> deoplete#mappings#manual_complete()
+"inoremap <expr><C-Space> deoplete#mappings#manual_complete()
 
 " Allow selecting autocomplete options with c-j and c-k.
 inoremap <C-j> <C-n>
 inoremap <C-k> <C-p>
+
+" Let dot trigger completion
+inoremap <expr>. pumvisible() ? "\<C-n>." : "."
 
 "}}}
 
