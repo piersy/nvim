@@ -121,7 +121,7 @@ set foldmethod=marker
 set autoread
 
 " Auto open quickfix window after running grep
-autocmd QuickFixCmdPost *grep* cwindow
+autocmd! QuickFixCmdPost *grep* cwindow
 
 " Position quickfix window at bottom of screen and take whole width. qf is the
 " quickfix filetype
@@ -166,10 +166,10 @@ let mapleader = ' '
 noremap <Space> <NOP>
 
 " Allow easy editing of init.vim file.
-nnoremap <leader>ve :vsplit $MYVIMRC<CR>
-" Allow easy sourcing of init.vim file.
-nnoremap <leader>vs :write $MYVIMRC<CR>:source $MYVIMRC<CR>
-
+nnoremap <leader>ve :e $MYVIMRC<CR>
+" source the vimrc on save, we also need to call AirlineRefresh otherwise the
+" airline display borks
+autocmd! BufWritePost $MYVIMRC source $MYVIMRC | AirlineRefresh
 
 " Allow easy zooming of current window.
 nnoremap <leader>z :call ZoomToggle()<CR>
@@ -185,7 +185,7 @@ function! ZoomToggle()
 endfunction
 
 " Command to save as sudo
-command WRITE execute "w !sudo tee %"
+command! WRITE execute "w !sudo tee %"
 
 nnoremap <leader>s :<C-u>write<CR>
 nnoremap <leader>S :<C-u>WRITE<CR>
@@ -253,8 +253,6 @@ Arpeggio inoremap df <esc>
 Arpeggio cnoremap df <C-c>
 " Make esc in normal mode clear highlighting.
 Arpeggio noremap <silent> df :<C-u>nohlsearch<CR><esc>
-" Map df to the equivalent of escape for terminal.
-Arpeggio tnoremap <silent> df :<C-u>nohlsearch<CR><esc>
 
 " Map fn to equivalient of escape in terminal mode. We can't map df here
 " otherwise when we have vim inside a terminal in vim and we escape the df
@@ -262,7 +260,7 @@ Arpeggio tnoremap <silent> df :<C-u>nohlsearch<CR><esc>
 " terminal. We also add a search back to first line starting with a dollar
 " then remove search highlighting. This stops the cursor appearing at the
 " bottom when we escape.
-"Arpeggio tnoremap fn <C-\><C-n>G?^\$<CR>:<C-u>nohlsearch<CR>
+Arpeggio tnoremap fn <C-\><C-n>G?^\$<CR>:<C-u>nohlsearch<CR>
 
 " Remove the original esc key functionality.
 inoremap <esc> <NOP>
@@ -277,7 +275,7 @@ Arpeggio nnoremap jk <CR>
 
 " As with esc we have to map fj instead of jk so that when using vim inside a
 " terminal in vim we do not trigger the <CR>  of the terminal.
-"Arpeggio tnoremap fj <CR>
+Arpeggio tnoremap fj <CR>
 
 " Remove the original <CR> key functionality. But not in insert mode since I
 " want to use it for UltiSnips. And not in command mode, since it is useful
@@ -285,8 +283,8 @@ Arpeggio nnoremap jk <CR>
 nnoremap <CR> <NOP>
 vnoremap <CR> <NOP>
 
-Arpeggio tnoremap <C-j> <down>
-Arpeggio tnoremap <C-k> <up>
+tnoremap <C-j> <down>
+tnoremap <C-k> <up>
 
 " Toggle spell
 nnoremap <leader>x  :<C-u>setlocal spell! <CR>
@@ -308,7 +306,7 @@ augroup END
 nnoremap <C-u> :<C-u>bp<CR>
 nnoremap <C-p> :<C-u>bn<CR>
 
-function QFixToggle()
+function! QFixToggle()
 	let qf = filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") == "qf"')
 	if len(qf) > 0
 		cclose
@@ -489,13 +487,17 @@ let g:airline#extensions#tabline#show_buffers = 1
 " Set use nice fonts for airline
 let g:airline_powerline_fonts = 1
 
-" need to set dict before setting any symbols
-let g:airline_symbols = {}
+" need to set dict before setting any symbols, also need to avoid overwriting
+" the dictionary if we are reloading our vimrc
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+
 " simply set this symbol to nothing since it was displaying strangely
 let g:airline_symbols.maxlinenr = ''
 
 " format the filenames in the tabbar to be filename only, the full path is
-" show in the statusline at the bottom.
+" shown in the statusline at the bottom.
 let g:airline#extensions#tabline#fnamemod = ':t'
 
 "}}}
