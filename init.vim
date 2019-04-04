@@ -10,8 +10,10 @@ Plug 'houshuang/vim-arpeggio'
 
 " Nice statusbar + open buffers displayed at top.
 Plug 'vim-airline/vim-airline'
+
 " vim-fugitive adds current branch display to vim-airline
 Plug 'tpope/vim-fugitive'
+
 " gitv adds gitk style git log browsing to vim it is a fugitive extension
 Plug 'gregsexton/gitv', {'on': ['Gitv']}
 
@@ -23,9 +25,13 @@ Plug 'tpope/vim-surround'
 
 " Autocomplete
 Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
+Plug 'nixprime/cpsm'
+
+"Plug 'Shougo/neosnippet.vim'
+"Plug 'Shougo/neosnippet-snippets'
 
 " Add automatic parentheses to completion (only works with deoplete)
-Plug 'Shougo/neopairs.vim'
+"Plug 'Shougo/neopairs.vim'
 
 " Snippet support
 Plug 'SirVer/ultisnips'
@@ -40,7 +46,8 @@ Plug 'autozimu/LanguageClient-neovim', {
     \ }
 
 " golang plugins
-Plug 'fatih/vim-go', { 'tag': 'v1.16' }
+"Plug 'fatih/vim-go', { 'tag': 'v1.19' }
+Plug 'fatih/vim-go'
 
 " refactoring support for go files
 Plug 'godoctor/godoctor.vim'
@@ -268,8 +275,10 @@ cnoremap <esc> <NOP>
 noremap <esc> <NOP>
 
 " Map jk to <CR> for insert and commandline mode. And also make it insert
-" entries from autocomplete.
-Arpeggio inoremap <expr>jk pumvisible() ? "\<C-n>" : "<CR>"
+" entries from autocomplete. This gets annoying if you have your min pattern
+" length set to one and you want to just insert a newline.
+"Arpeggio inoremap <expr>jk pumvisible() ? "\<C-n>" : "<CR>"
+Arpeggio inoremap jk <CR>
 Arpeggio cnoremap jk <CR>
 Arpeggio nnoremap jk <CR>
 
@@ -434,30 +443,77 @@ endfunction
 " enable deoplete
 let g:deoplete#enable_at_startup = 1
 
-" case insensitive search untill capital is entered
-let g:deoplete#enable_smart_case = 1
-
-let g:deoplete#auto_complete_start_length = 1
-
 " ignore the around source which adds random complete words from around the
 " cursor into the complete options, this is for a later version
 call deoplete#custom#option({
-\ 'ignore_sources': { '_': ['around'] },
+\ 'ignore_sources': { 'go': ['around', 'buffer'] },
 \ 'refresh_always': v:false, 
 \ 'camel_case'    : v:true,
+\ 'smart_case'    : v:false,
 \ 'min_pattern_length' : 1,
 \})
 
+"\ 'smart_case'    : v:true, // when you want to search for ccccCCCC smart
+"case becomes annoying where camel case shouldn't
+
+" skip_chars stop completion when entered except if the skip char adds to a
+" word that makes it a perfect match eg skip char n and the completion is sign
+" and you are at sig and you type sign. Otherwise completion stops with a
+" skipChar the defualt value is brackets
+
+" converter_remove_overlap will truncate the inserted candidate in the case
+" that the the text following the cursor position
+"
+" When inserting a candidate if the text following the cursor position matches
+" the tail of the candidate the candidate will be truncated to remove that
+" tail, such that you end up with just the required candidate rather than
+" duplicating the tail.
+
+"call deoplete#custom#source('_', 'converters',
+"		\ ['converter_auto_paren','remove_overlap'])
+
+"call deoplete#custom#source('_', 'converters',
+"		\ ['converter_auto_delimiter', 'remove_overlap'])
+
+"call deoplete#custom#source('_', 'converters',
+		"\ ['converter_auto_delimiter'])
+
+
+
+	"	call deoplete#custom#filter('attrs_order', {
+	"	\ 'javascript': {
+	"	\    		'kind': [
+	"	\			'Function',
+	"	\			'Property'
+	"	\			]
+	"	\ },
+	"	\})
+
+"call deoplete#custom#option('sources', {
+"\ '_': ['file'],
+"\ 'min_pattern_length' : 1,
+"\})
+
+
+
+"call deoplete#custom#option('candidate_marks',
+"      \ ['A'])
+"inoremap <expr>A       deoplete#insert_candidate(0)
+
+"let g:neosnippet#enable_completed_snippet = 1 
+"" Plugin key-mappings.
+"" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
+"imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+"smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+"xmap <C-k>     <Plug>(neosnippet_expand_target)
+
 " Auto insert parentheses
-let g:neopairs#enable = 1
-call deoplete#custom#source('_', 'converters', ['converter_auto_paren'])
+"let g:neopairs#enable = 1
+"call deoplete#custom#source('_', 'converters', ['converter_auto_paren', 'converter_remove_overlap'])
 
-" This stops deoplete from selecting the first option in the list
-" automatically.
-"set completeopt+=noinsert,menuone
-
-" Disable auto popup menu
-"let g:deoplete#disable_auto_complete = 1
+" This seems to be the best of the bunch  
+call deoplete#custom#source('_', 'matchers', ['matcher_cpsm'])
+call deoplete#custom#source('_', 'sorters', [])
 
 " Set ctrl+space to show completion menu.
 "inoremap <expr><C-Space> deoplete#mappings#manual_complete()
@@ -466,8 +522,13 @@ call deoplete#custom#source('_', 'converters', ['converter_auto_paren'])
 inoremap <C-j> <C-n>
 inoremap <C-k> <C-p>
 
-" Let dot trigger completion
-inoremap <expr>. pumvisible() ? "\<C-n>." : "."
+" Let dot trigger completion - causes problems when you actually just want to
+" enter a dot.
+"inoremap <expr>. pumvisible() && empty(v:completed_item) ? "\<C-n>." : "."
+
+" Let comma trigger completion, this is causing a lot of problems when
+" inputting parameters. So disabled
+" inoremap <expr>, pumvisible() && empty(v:completed_item) ? "\<C-n>," : ","
 
 "}}}
 
@@ -545,6 +606,7 @@ let g:go_fmt_command = "goimports"
 
 " Exclude protobuf generated files from metalinter.
 let g:go_metalinter_excludes = [".*\.pb\.go"]
+let g:go_metalinter_command = "golangci-lint"
 
 " Use local godoc server
 let g:go_doc_url = 'http://localhost:6060'
@@ -689,4 +751,5 @@ command! -bang -nargs=* Rg
   \           : fzf#vim#with_preview('right:50%:hidden', '?'),
   \   <bang>0)
 
+ 
 "}}}
