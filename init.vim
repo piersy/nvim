@@ -6,7 +6,7 @@ call plug#begin()
 Plug 'tomasr/molokai'
 
 " Map multiple simultaneous key presses.
-Plug 'houshuang/vim-arpeggio'
+Plug 'piersy/vim-arpeggio'
 
 " Nice statusbar + open buffers displayed at top.
 Plug 'vim-airline/vim-airline'
@@ -74,6 +74,8 @@ Plug 'lambdalisue/suda.vim'
 " Add plugins to &runtimepath.
 call plug#end()
 "}}}
+if isdirectory($HOME . "/.config/nvim/plugged")
+
 "let g:python3_host_prog="/usr/local/bin/python3.5"
 "let g:python3_host_prog = "/usr/local/bin/python3.5"
 " Arpeggio needs to be loaded as the init.vim is parsed so that
@@ -753,3 +755,5 @@ command! -bang -nargs=* Rg
 
  
 "}}}
+
+endif 
