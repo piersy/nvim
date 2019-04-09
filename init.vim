@@ -25,7 +25,8 @@ Plug 'tpope/vim-surround'
 
 " Autocomplete
 Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
-Plug 'nixprime/cpsm'
+Plug 'nixprime/cpsm', { 'do': 'bash install.sh' }
+
 
 "Plug 'Shougo/neosnippet.vim'
 "Plug 'Shougo/neosnippet-snippets'
