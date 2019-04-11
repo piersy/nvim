@@ -27,6 +27,7 @@ Plug 'tpope/vim-surround'
 Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
 Plug 'nixprime/cpsm', { 'do': 'bash install.sh' }
 
+Plug 'guns/xterm-color-table.vim'
 
 "Plug 'Shougo/neosnippet.vim'
 "Plug 'Shougo/neosnippet-snippets'
