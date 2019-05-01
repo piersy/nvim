@@ -749,6 +749,7 @@ au Syntax * RainbowParenthesesLoadBraces
 "fzf config {{{
 
 nnoremap <leader>o :<C-u>:Files<CR>
+nnoremap <leader>j :<C-u>:History:<CR>
 
 " FZF with ripgrep FTW!!!
 " --column: Show column number
