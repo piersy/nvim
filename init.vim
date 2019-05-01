@@ -627,7 +627,7 @@ let g:go_fmt_command = "goimports"
 
 " Exclude protobuf generated files from metalinter.
 let g:go_metalinter_excludes = [".*\.pb\.go"]
-let g:go_metalinter_command = "golangci-lint"
+let g:go_metalinter_command = "golangci-lint run"
 
 " Use local godoc server
 let g:go_doc_url = 'http://localhost:6060'
@@ -636,7 +636,7 @@ let g:go_doc_url = 'http://localhost:6060'
 let g:go_test_timeout = '20s'
 
 " run :GoBuild or :GoTestCompile based on the go file
-function! s:build_go_files()
+function! BuildGoFiles()
 	let l:file = expand('%')
 	if l:file =~# '^\f\+_test\.go$'
 		" The first parameter controls whether we jump to the first error or
@@ -659,8 +659,11 @@ function! ApplyVimGoMaps()
 	" Automatic write on build
 	setlocal autowrite
 
+	" set the text width for comment formatting
+	"set textwidth=90
+
 	" Build both test and non test files with one command
-	nnoremap <buffer> <leader>b :<C-u>call <SID>build_go_files()<CR>
+	nnoremap <buffer> <leader>b :<C-u>call BuildGoFiles()<CR>
 
 	nnoremap <buffer> <leader>t :<C-u>GoTest<CR>
 
@@ -694,7 +697,7 @@ function! ApplyVimGoMaps()
 	nnoremap <buffer> <C-l> :<C-u>Cnext<CR>
 	nnoremap <buffer> <C-h> :<C-u>Cprev<CR>
 
-	inoremap <buffer> kl <ESC> :<C-u>call <SID>build_go_files()<CR>
+	Arpeggio inoremap <buffer> kl <ESC>:<C-u>call BuildGoFiles()<CR>
 	
 endfunction "}}}
 
