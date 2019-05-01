@@ -145,21 +145,29 @@ noremap H 0
 " go to end of line not including carriage return.
 noremap L g_
 
-" pgup/pgdown move too far to track text easily but ctrl-d and
-" ctrl-u are hard to reach and not comfy. I tried mapping this
-" with arpeggio, but it turns out that trying to repeatedly press
-" two keys together, for example when scrolling down a large
-" document is not very comfortable. Best to keep arpeggio mappings
-" for operations that are not repeated in quick succession.
+" pgup/pgdown move too far to track text easily but ctrl-d and ctrl-u are hard
+" to reach and not comfy. I tried mapping this with arpeggio, but it turns out
+" that trying to repeatedly press two keys together, for example when
+" scrolling down a large document is not very uncomfortable. Best to keep
+" arpeggio mappings for operations that are not repeated in quick succession.
 nnoremap <PageUp> <C-U>
 nnoremap <PageDown> <C-D>
 
-" This overwrites the default mapping of K which opens the man
-" page for the word under the cursor
+" This overwrites the default mapping of K which opens the man page for the
+" word under the cursor and the default mapping of <C-h> in visual mode which
+" is the same as backspace.
 nnoremap K <C-U>
 nnoremap J <C-D>
 vnoremap K <C-U>
 vnoremap J <C-D>
+
+" Move a few lines J and K scroll half a screen each this is for finer
+" movements.
+
+nnoremap <C-j> 5j
+nnoremap <C-k> 5k
+vnoremap <C-j> 5j
+vnoremap <C-k> 5k
 
 " Open man page for word under cursor '<C-R><C-W>' expands to the word under
 " the cursor
@@ -666,9 +674,16 @@ function! ApplyVimGoMaps()
 	" to get the doc.
 	nnoremap <buffer> K <C-U>
 
+	" This sets up commands to loop through the quickfix list. Normal
+	" behaviour will only acknowledge cnext or cprev if there is more than one
+	" quickfix entry.
+	command! Cnext try | cnext | catch | cfirst | catch | endtry
+	command! Cprev try | cprev | catch | clast | catch | endtry
+
+
 	" Cycle through errors in the quickfix
-	nnoremap <buffer> <C-j> :<C-u>cnext<CR>
-	nnoremap <buffer> <C-k> :<C-u>cprevious<CR>
+	nnoremap <buffer> <C-l> :<C-u>Cnext<CR>
+	nnoremap <buffer> <C-h> :<C-u>Cprev<CR>
 
 	inoremap <buffer> kl <ESC> :<C-u>call <SID>build_go_files()<CR>
 	
