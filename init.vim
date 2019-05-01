@@ -347,6 +347,15 @@ nnoremap M B
 vnoremap m b
 vnoremap M B
 
+" Repeat last command made easy, \ is the only unused key on the keyboard in
+" normal mode with the default bindings see ':help index' for a full list of
+" keys and their default bindings.
+nnoremap \ @:
+
+" ctrl backspace to delete a word in insert mode.
+" I had to use crtl+v in insert mode to find the keycode for ctrl+backspace.
+inoremap  <C-W>
+
 " help buffer key mappings {{{
 " help mappings have to be set here otherwise they are overwritten with more
 " buffer specific maps
