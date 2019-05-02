@@ -29,14 +29,14 @@ Plug 'nixprime/cpsm', { 'do': 'bash install.sh' }
 
 Plug 'guns/xterm-color-table.vim'
 
-"Plug 'Shougo/neosnippet.vim'
-"Plug 'Shougo/neosnippet-snippets'
+Plug 'Shougo/neosnippet.vim'
+Plug 'Shougo/neosnippet-snippets'
 
 " Add automatic parentheses to completion (only works with deoplete)
 "Plug 'Shougo/neopairs.vim'
 
 " Snippet support
-Plug 'SirVer/ultisnips'
+"Plug 'SirVer/ultisnips'
 
 " Go sources for deoplete
 Plug 'zchee/deoplete-go', { 'do': 'make'}
@@ -521,13 +521,6 @@ call deoplete#custom#option({
 "      \ ['A'])
 "inoremap <expr>A       deoplete#insert_candidate(0)
 
-"let g:neosnippet#enable_completed_snippet = 1 
-"" Plugin key-mappings.
-"" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
-"imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-"smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-"xmap <C-k>     <Plug>(neosnippet_expand_target)
-
 " Auto insert parentheses
 "let g:neopairs#enable = 1
 "call deoplete#custom#source('_', 'converters', ['converter_auto_paren', 'converter_remove_overlap'])
@@ -539,8 +532,22 @@ call deoplete#custom#source('_', 'sorters', [])
 " Set ctrl+space to show completion menu.
 "inoremap <expr><C-Space> deoplete#mappings#manual_complete()
 
-" Allow selecting autocomplete options with c-j and c-k.
-inoremap <C-j> <C-n>
+" This auto expands snippets when the completion menu closes.
+let g:neosnippet#enable_complete_done = 1
+" This sets neosnippet to complete functions in completion menu.
+let g:neosnippet#enable_completed_snippet = 1 
+
+" this prevents the weird markers being displayed
+if has('conceal')
+	set conceallevel=2 concealcursor=niv
+endif
+
+" Allow selecting autocomplete options/snippet segments with c-j Plugin
+" key-mappings.
+" Note: You must use "imap" and "smap" for the Plug commands.
+
+imap <expr><C-j> pumvisible() ? "\<C-n>" : "\<Plug>(neosnippet_jump)"
+smap <C-j> <Plug>(neosnippet_jump)
 inoremap <C-k> <C-p>
 
 " Let dot trigger completion - causes problems when you actually just want to
@@ -698,6 +705,8 @@ function! ApplyVimGoMaps()
 	nnoremap <buffer> <C-h> :<C-u>Cprev<CR>
 
 	Arpeggio inoremap <buffer> kl <ESC>:<C-u>call BuildGoFiles()<CR>
+
+	nnoremap <buffer> <leader>g :<C-u>GoDecls<CR>
 	
 endfunction "}}}
 
@@ -750,6 +759,7 @@ au Syntax * RainbowParenthesesLoadBraces
 
 nnoremap <leader>o :<C-u>:Files<CR>
 nnoremap <leader>j :<C-u>:History:<CR>
+nnoremap <leader>l :<C-u>:BLines<CR>
 
 " FZF with ripgrep FTW!!!
 " --column: Show column number
