@@ -43,16 +43,16 @@ Plug 'zchee/deoplete-go', { 'do': 'make'}
 
 " Language server
 Plug 'autozimu/LanguageClient-neovim', {
-    \ 'branch': 'next',
-    \ 'do': 'bash install.sh',
-    \ }
+			\ 'branch': 'next',
+			\ 'do': 'bash install.sh',
+			\ }
 
 " golang plugins
 "Plug 'fatih/vim-go', { 'tag': 'v1.19' }
 Plug 'fatih/vim-go'
 
 " refactoring support for go files
-Plug 'godoctor/godoctor.vim'
+Plug 'godoctor/godoctor.vim' "doesn't play well with 2 gopaths
 
 " Nice parentheses
 Plug 'kien/rainbow_parentheses.vim'
@@ -72,6 +72,26 @@ Plug 'junegunn/fzf.vim'
 
 " fixes the ':w !sudo tee %' problem in neovim with ':w suda://%'
 Plug 'lambdalisue/suda.vim'
+
+Plug 'tpope/vim-commentary'
+
+" Syntax highliting for sane files
+Plug 'bloom42/sane-vim'
+
+" Syntax highliting for typescript
+Plug 'leafgarland/typescript-vim'
+
+" Preview markdown files in browser
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
+
+" See all your edits in a tree :UndotreeToggle
+Plug 'mbbill/undotree'
+
+" diff blocks of text with :Linediff on selected blocks
+Plug 'AndrewRadev/linediff.vim'
+
+" Wrap arguments on functions with :ArgWrap
+Plug 'FooSoft/vim-argwrap'
 
 " Add plugins to &runtimepath.
 call plug#end()
@@ -93,6 +113,7 @@ colorscheme molokai
 set guicursor=
 
 " generic vim options {{{
+set errorbells
 
 " Permanently display line numbers at the side of the screen.
 set number
@@ -131,6 +152,24 @@ set foldmethod=marker
 " changes.
 set autoread
 
+" history options {{{
+
+" Protect changes between writes. Default values of
+" updatecount (200 keystrokes) and updatetime
+" (4 seconds) are fine
+set swapfile
+
+" protect against crash-during-write
+set writebackup
+" but do not persist backup after successful write
+set nobackup
+" use rename-and-write-new method whenever safe
+set backupcopy=auto
+" persist the undo tree for each file
+set undofile
+
+"}}}
+
 " Auto open quickfix window after running grep
 autocmd! QuickFixCmdPost *grep* cwindow
 
@@ -140,8 +179,9 @@ au FileType qf wincmd J
 "}}}
 
 " generic vim key mappings {{{
+
 " go to beginning of line.
-noremap H 0
+noremap H ^
 " go to end of line not including carriage return.
 noremap L g_
 
@@ -168,6 +208,8 @@ nnoremap <C-j> 5j
 nnoremap <C-k> 5k
 vnoremap <C-j> 5j
 vnoremap <C-k> 5k
+onoremap <C-j> 5j
+onoremap <C-k> 5k
 
 " Open man page for word under cursor '<C-R><C-W>' expands to the word under
 " the cursor
@@ -180,15 +222,19 @@ cnoremap <C-k> <Up>
 
 " Space key does nothing in insert, it is also easily reachable from both
 " hands.
-let mapleader = ' '
+let mapleader = "\<Space>"
 " Remove the normal space function in normal mode
-noremap <Space> <NOP>
+nnoremap <Space> <NOP>
 
 " Allow easy editing of init.vim file.
 nnoremap <leader>ve :e $MYVIMRC<CR>
 " source the vimrc on save, we also need to call AirlineRefresh otherwise the
 " airline display borks
 autocmd! BufWritePost $MYVIMRC source $MYVIMRC | AirlineRefresh
+
+" Unfortunately the keycodes for tab and ctrl+i are the same, so this
+" overrides default ctrl+i functionality.
+"nnoremap <Tab> :<C-u>%s/
 
 " Allow easy zooming of current window.
 nnoremap <leader>z :call ZoomToggle()<CR>
@@ -215,14 +261,14 @@ function! CloseBufferOrQuit()
 	" This config lead to buffers with no name being ignored, so starting vim
 	" without any arguments and then pressing <leader>c resulted in no effect
 	"let currentbuffers = filter(range(1, bufnr('$')), '! empty(bufname(v:val)) && buflisted(v:val)')
-	
+
 	" This config at least solves the above issue
 	let currentbuffers = filter(range(1, bufnr('$')), 'buflisted(v:val)')
 	" Im not really sure what type of buffer would have an empty bufname
 	" let currentbuffers = filter(range(1, bufnr('$')), '! empty(bufname(v:val))')
-	
+
 	" echom join(currentbuffers, ":")
-	
+
 	" If there is only one visible buffer left and it is current  then quit.
 	" The check to see if the buffer is current prevents us quitting when
 	" closing help with one other buffer open, since help is not listed for
@@ -245,7 +291,8 @@ function! CloseBufferOrQuit()
 endfunction
 
 nnoremap <leader>c :<C-u>call CloseBufferOrQuit()<CR>
-nnoremap <leader>Q :<C-u>quitall!<CR>
+nnoremap <leader>q :<C-u>quitall<CR>
+nnoremap <leader><ESC> :<C-u>quitall!<CR>
 
 nnoremap <leader>w :<C-u>vsplit<CR>
 nnoremap <leader>k :<C-u>close<CR>
@@ -286,6 +333,12 @@ inoremap <esc> <NOP>
 cnoremap <esc> <NOP>
 noremap <esc> <NOP>
 
+" This rings the bell, unfortunately we cannot execute it with silent because
+" that prevents the bell char from reaching the terminal, so instead we use
+" another <CR> to close the output window and return to where we were. Now I
+" need to find a way to attach this to keys I shouldn't use too much.
+Arpeggio nnoremap po :<C-u>!echo -ne '\007'<CR><CR>
+
 " Map jk to <CR> for insert and commandline mode. And also make it insert
 " entries from autocomplete. This gets annoying if you have your min pattern
 " length set to one and you want to just insert a newline.
@@ -293,7 +346,7 @@ noremap <esc> <NOP>
 Arpeggio inoremap jk <CR>
 Arpeggio cnoremap jk <CR>
 Arpeggio nnoremap jk <CR>
-
+"
 " As with esc we have to map fj instead of jk so that when using vim inside a
 " terminal in vim we do not trigger the <CR>  of the terminal.
 Arpeggio tnoremap fj <CR>
@@ -341,6 +394,16 @@ endfunction
 " Easy quickfix closing
 nnoremap <leader><Space> :<C-u>call QFixToggle()<CR>
 
+" This sets up commands to loop through the quickfix list. Normal
+" behaviour will only acknowledge cnext or cprev if there is more than one
+" quickfix entry.
+command! Cnext try | cnext | catch | cfirst | catch | endtry
+command! Cprev try | cprev | catch | clast | catch | endtry
+
+" Cycle through entries in the quickfix
+nnoremap <C-l> :<C-u>Cnext<CR>
+nnoremap <C-h> :<C-u>Cprev<CR>
+
 " Remap b for split keyboard
 nnoremap m b
 nnoremap M B
@@ -381,10 +444,10 @@ endfunction
 " Strips trailing whitespace and makes sure the cursor returns to it's initial
 " position.
 function! <SID>StripTrailingWhitespaces()
-    let l = line(".")
-    let c = col(".")
-    %s/\s\+$//e
-    call cursor(l, c)
+	let l = line(".")
+	let c = col(".")
+	%s/\s\+$//e
+	call cursor(l, c)
 endfun
 "}}}
 
@@ -434,7 +497,7 @@ function! ConfigureYaml()
 	" The shiftwidth controls the indent usded for autoindenting
 	" setting it to 0 makes it follow the tabstop setting.
 	setlocal shiftwidth=0
-	
+
 	" Ensures that tabs are expanded to spaces when inserted
 	setlocal expandtab
 endfunction
@@ -453,7 +516,7 @@ function! ConfigureAndroidManifest()
 	" The shiftwidth controls the indent usded for autoindenting
 	" setting it to 0 makes it follow the tabstop setting.
 	setlocal shiftwidth=0
-	
+
 	" Ensures that tabs are expanded to spaces when inserted
 	setlocal expandtab
 endfunction
@@ -467,12 +530,15 @@ let g:deoplete#enable_at_startup = 1
 " ignore the around source which adds random complete words from around the
 " cursor into the complete options, this is for a later version
 call deoplete#custom#option({
-\ 'ignore_sources': { 'go': ['around', 'buffer'] },
-\ 'refresh_always': v:false, 
-\ 'camel_case'    : v:true,
-\ 'smart_case'    : v:false,
-\ 'min_pattern_length' : 1,
-\})
+			\ 'ignore_sources': { 'go': ['around', 'buffer'] },
+			\ 'refresh_always': v:false, 
+			\ 'camel_case'    : v:true,
+			\ 'smart_case'    : v:false,
+			\ 'min_pattern_length' : 1,
+			\})
+call deoplete#custom#source('_',  'max_menu_width', 0)
+call deoplete#custom#source('_',  'max_abbr_width', 0)
+call deoplete#custom#source('_',  'max_kind_width', 0)
 
 "\ 'smart_case'    : v:true, // when you want to search for ccccCCCC smart
 "case becomes annoying where camel case shouldn't
@@ -497,18 +563,18 @@ call deoplete#custom#option({
 "		\ ['converter_auto_delimiter', 'remove_overlap'])
 
 "call deoplete#custom#source('_', 'converters',
-		"\ ['converter_auto_delimiter'])
+"\ ['converter_auto_delimiter'])
 
 
 
-	"	call deoplete#custom#filter('attrs_order', {
-	"	\ 'javascript': {
-	"	\    		'kind': [
-	"	\			'Function',
-	"	\			'Property'
-	"	\			]
-	"	\ },
-	"	\})
+"	call deoplete#custom#filter('attrs_order', {
+"	\ 'javascript': {
+"	\    		'kind': [
+"	\			'Function',
+"	\			'Property'
+"	\			]
+"	\ },
+"	\})
 
 "call deoplete#custom#option('sources', {
 "\ '_': ['file'],
@@ -525,30 +591,76 @@ call deoplete#custom#option({
 "let g:neopairs#enable = 1
 "call deoplete#custom#source('_', 'converters', ['converter_auto_paren', 'converter_remove_overlap'])
 
-" This seems to be the best of the bunch  
-call deoplete#custom#source('_', 'matchers', ['matcher_cpsm'])
-call deoplete#custom#source('_', 'sorters', [])
+" This seems to be the best of the bunch, changed my mind on this, it doesn't
+" give good suggestions.
+"call deoplete#custom#source('_', 'matchers', ['matcher_cpsm'])
+"call deoplete#custom#source('_', 'sorters', [])
 
 " Set ctrl+space to show completion menu.
 "inoremap <expr><C-Space> deoplete#mappings#manual_complete()
 
 " This auto expands snippets when the completion menu closes.
 let g:neosnippet#enable_complete_done = 1
-" This sets neosnippet to complete functions in completion menu.
-let g:neosnippet#enable_completed_snippet = 1 
+
+" This sets neosnippet to complete functions in completion menu. Unfortunately
+" it breaks down when used with functions that return functions in go, which
+" is very annoying.
+"let g:neosnippet#enable_completed_snippet = 1 
+
+" Allow selecting autocomplete options/snippet segments with c-j Plugin
+" key-mappings.
+" Note: You must use "imap" and "smap" for the Plug commands.
+
+" navigate the menu with cj and ck
+inoremap <C-j> <C-n>
+inoremap <C-k> <C-p>
+
+"Causes the first entry to be selected by default in the popup menu.
+"set completeopt+=noinsert
+"Unfortunately the above this does not play well with deoplete
+"deoplete-go and airline-vim, the three plugins together plus this cause
+"problems.
+"
+"For now I will mimic noinsert with the below
+" 1. when pumvisible & entry selected, which is a snippet, <CR> triggers snippet expansion,
+" 2. when pumvisible & entry selected, which is not a snippet, <CR> only closes pum
+" 3. when pumvisible & no entry selected, <CR> closes pum and inserts newline
+" 4. when pum not visible, <CR> inserts only a newline
+"function! s:ExpandSnippetOrClosePumOrReturnNewline()
+"    if pumvisible()
+"        if !empty(v:completed_item)
+"            let snippet = UltiSnips#ExpandSnippet()
+"            if g:ulti_expand_res > 0
+"                return snippet
+"            else
+"                return "\<C-y>"
+"            endif
+"        else
+"            return "\<C-y>\<CR>"
+"        endif
+"    else
+"        return "\<CR>"
+"    endif
+"endfunction
+
+" map enter to select insert the first entry if none selected or the selected
+" entry otherwise and esc.
+inoremap <expr><CR> pumvisible() && empty(v:completed_item)? "\<c-n>\<c-y>\<ESC>" : "\<c-y>\<ESC>"
+" I thought this binding would be useful but actually its a bit of a pain to
+" use c-j to skipp snippet sections, tab is much easier and requires one hand.
+"imap <expr><C-j> pumvisible() ? "\<C-n>" : "\<Plug>(neosnippet_jump)" 
+
+" This binds TAB to jump to the next snippet jump point if there is one or
+" otherwise if ther is a menu visible insert the first entry if none selected
+" or the selected entry otherwise, and otherwise insert a tab.
+imap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? empty(v:completed_item)? "\<c-n>\<c-y>" : "\<c-y>" : "\<TAB>"
+smap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? empty(v:completed_item)? "\<c-n>\<c-y>" : "\<c-y>" : "\<TAB>"
 
 " this prevents the weird markers being displayed
 if has('conceal')
 	set conceallevel=2 concealcursor=niv
 endif
 
-" Allow selecting autocomplete options/snippet segments with c-j Plugin
-" key-mappings.
-" Note: You must use "imap" and "smap" for the Plug commands.
-
-imap <expr><C-j> pumvisible() ? "\<C-n>" : "\<Plug>(neosnippet_jump)"
-smap <C-j> <Plug>(neosnippet_jump)
-inoremap <C-k> <C-p>
 
 " Let dot trigger completion - causes problems when you actually just want to
 " enter a dot.
@@ -558,11 +670,6 @@ inoremap <C-k> <C-p>
 " inputting parameters. So disabled
 " inoremap <expr>, pumvisible() && empty(v:completed_item) ? "\<C-n>," : ","
 
-"}}}
-
-" deoplete go config {{{
-" Set path to gocode binary, this is recommended for performance reasons
-let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
 "}}}
 
 " airline config {{{
@@ -579,7 +686,7 @@ let g:airline_powerline_fonts = 1
 " need to set dict before setting any symbols, also need to avoid overwriting
 " the dictionary if we are reloading our vimrc
 if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
+	let g:airline_symbols = {}
 endif
 
 " simply set this symbol to nothing since it was displaying strangely
@@ -599,27 +706,27 @@ let g:UltiSnipsJumpBackwardTrigger="<C-H>"
 
 " LanguageClient config {{{
 let g:LanguageClient_serverCommands = {
-\ 'javascript': ['node', '/home/piers/programs/javascript-typescript-langserver/lib/language-server-stdio', '-l', 'logggg'],
-    \ 'cpp': ['/home/piers/projects/cquery/build/release/bin/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
-    \ 'c': ['/home/piers/projects/cquery/build/release/bin/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
-    \ }
-
+			\ 'javascript': ['node', '/home/piers/projects/javascript-typescript-langserver/lib/language-server-stdio', '-l', '/dev/null'],
+			\ 'typescript': ['node', '/home/piers/projects/javascript-typescript-langserver/lib/language-server-stdio', '-t', '-l', '/dev/null'],
+			\ 'cpp': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
+			\ 'c': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
+			\ }
 
 " Unfortunately this seems to conflict with deoplete and causes the completion
 " menu to update while cycling through completions.
 "    \ 'go': ['go-langserver'],
-	
+
 
 augroup language_client_maps
 	autocmd!
-	autocmd filetype c,cpp,javascript call ApplyLanguageClientMaps()
+	autocmd filetype c,cpp,javascript,typescript call ApplyLanguageClientMaps()
 augroup END
 
 function! ApplyLanguageClientMaps()
 	nnoremap <silent> <buffer> <leader>d :<C-u>call LanguageClient#textDocument_definition()<CR>
 	nnoremap <silent> <buffer> <leader>h :<C-u>call LanguageClient#textDocument_hover()<CR>
 	nnoremap <silent> <buffer> <leader>u :<C-u>call LanguageClient#textDocument_references()<CR>
-	nnoremap <silent> <buffer> <leader>; :<C-u>call LanguageClient#textDocument_documentSymbol()<CR>
+	nnoremap <silent> <buffer> <leader>g :<C-u>call LanguageClient#textDocument_documentSymbol()<CR>
 	nnoremap <silent> <buffer> <leader>r :<C-u>call LanguageClient_textDocument_rename()<CR>
 endfunction
 "}}}
@@ -662,6 +769,52 @@ augroup vimgo_maps
 	autocmd filetype go call ApplyVimGoMaps()
 augroup END
 
+
+" Go back to beginning of current identifier and insert/delete the star *
+function! ToggleStar()
+	" Save current position
+	let save_pos = getpos(".")
+
+	" Move to just before beginning of word including dots as word chars
+	set iskeyword+=.
+	normal! bh
+	set iskeyword-=.
+		
+	" Check if we have a star and if so delete
+	if getline(".")[col(".")-1] == '*'
+		normal! x
+		" Modify save_pos to account for the removed char
+		let save_pos[2] = save_pos[2]-1
+	else
+		normal! a*
+		" Modify save_pos to account for the added char
+		let save_pos[2] = save_pos[2]+1
+	endif
+
+	" Restor postion
+	call setpos('.', save_pos)
+endfunction
+
+
+" Executed on a line with a function will propulate godoc for the line above
+" leaveing you in insert mode.
+function! PopulateGodoc()
+	" go to beginning of line then go foward a word then forward a char
+	normal! ^wh 
+	" if the current char is a bracket then goto the next bracket and then to
+	" the next word
+	if getline(".")[col(".")-1] == '('
+		normal! %w
+	endif
+	" we need to use execute here so that we can use ^[ as escape to be able
+	" to print. Yank the word open a line above add the comment followed by a
+	" space, print the word and append 2 spaces.
+	execute ":normal! ywO// pa  "
+	" leve the caller in insert mode
+	startinsert
+endfunction
+
+
 function! ApplyVimGoMaps()
 	" Automatic write on build
 	setlocal autowrite
@@ -674,8 +827,9 @@ function! ApplyVimGoMaps()
 
 	nnoremap <buffer> <leader>t :<C-u>GoTest<CR>
 
-	" Easy doc
-	nnoremap <buffer> <leader>q :<C-u>GoDoc<CR>
+	" Easy doc, rebinding this to quitall for now, i don't seem to use this
+	" binding much.
+	"nnoremap <buffer> <leader>q :<C-u>GoDoc<CR> 
 
 	" Easy referrers
 	nnoremap <buffer> <leader>u :<C-u>GoReferrers<CR>
@@ -684,7 +838,6 @@ function! ApplyVimGoMaps()
 	nnoremap <buffer> <leader>d :<C-u>GoDef<CR>
 
 	" make the return to start (r for return) shortcut easier.
-	nnoremap <buffer> <leader>r :<C-u>GoDefPop<CR>
 
 	" make the go alternate shortcut easier.
 	nnoremap <buffer> <leader>a :<C-u>GoAlternate<CR>
@@ -693,41 +846,36 @@ function! ApplyVimGoMaps()
 	" to get the doc.
 	nnoremap <buffer> K <C-U>
 
-	" This sets up commands to loop through the quickfix list. Normal
-	" behaviour will only acknowledge cnext or cprev if there is more than one
-	" quickfix entry.
-	command! Cnext try | cnext | catch | cfirst | catch | endtry
-	command! Cprev try | cprev | catch | clast | catch | endtry
-
-
-	" Cycle through errors in the quickfix
-	nnoremap <buffer> <C-l> :<C-u>Cnext<CR>
-	nnoremap <buffer> <C-h> :<C-u>Cprev<CR>
-
 	Arpeggio inoremap <buffer> kl <ESC>:<C-u>call BuildGoFiles()<CR>
+	Arpeggio nnoremap <buffer> kl :<C-u>call BuildGoFiles()<CR>
 
 	nnoremap <buffer> <leader>g :<C-u>GoDecls<CR>
-	
+	nnoremap <buffer> <leader>p :<C-u>ArgWrap<CR>
+
+	nnoremap <buffer> 88 :<C-u>call ToggleStar()<CR>
+
+	nnoremap <buffer> <F6> :<C-u>call PopulateGodoc()<CR>
+
 endfunction "}}}
 
 "rainbow parenthesis config {{{
 let g:rbpt_max = 16
 let g:rbpt_loadcmd_toggle = 0
 let g:rbpt_colorpairs = [
-    \ ['brown',       'RoyalBlue3'],
-    \ ['darkgray',    'DarkOrchid3'],
-    \ ['darkgreen',   'firebrick3'],
-    \ ['darkcyan',    'RoyalBlue3'],
-    \ ['darkred',     'SeaGreen3'],
-    \ ['darkmagenta', 'DarkOrchid3'],
-    \ ['brown',       'firebrick3'],
-    \ ['gray',        'RoyalBlue3'],
-    \ ['darkmagenta', 'DarkOrchid3'],
-    \ ['darkgreen',   'RoyalBlue3'],
-    \ ['darkcyan',    'SeaGreen3'],
-    \ ['darkred',     'DarkOrchid3'],
-    \ ['red',         'firebrick3'],
-    \ ]
+			\ ['brown',       'RoyalBlue3'],
+			\ ['darkgray',    'DarkOrchid3'],
+			\ ['darkgreen',   'firebrick3'],
+			\ ['darkcyan',    'RoyalBlue3'],
+			\ ['darkred',     'SeaGreen3'],
+			\ ['darkmagenta', 'DarkOrchid3'],
+			\ ['brown',       'firebrick3'],
+			\ ['gray',        'RoyalBlue3'],
+			\ ['darkmagenta', 'DarkOrchid3'],
+			\ ['darkgreen',   'RoyalBlue3'],
+			\ ['darkcyan',    'SeaGreen3'],
+			\ ['darkred',     'DarkOrchid3'],
+			\ ['red',         'firebrick3'],
+			\ ]
 " removed colors
 "
 "\ ['Darkblue',    'SeaGreen3'],
@@ -775,11 +923,11 @@ nnoremap <leader>l :<C-u>:BLines<CR>
 "command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1, <bang>0)
 
 command! -bang -nargs=* Find
- \ call fzf#vim#grep(
- \   'rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1,
-  \   <bang>0 ? fzf#vim#with_preview('up:60%')
-  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
-  \   <bang>0)
+			\ call fzf#vim#grep(
+			\   'rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1,
+			\   <bang>0 ? fzf#vim#with_preview('up:60%')
+			\           : fzf#vim#with_preview('right:50%:hidden', '?'),
+			\   <bang>0)
 set grepprg=rg\ --vimgrep
 
 nnoremap <leader>f :<C-u>:Find<CR>
@@ -787,13 +935,62 @@ nnoremap <leader>f :<C-u>:Find<CR>
 
 " Similarly, we can apply it to fzf#vim#grep. To use ripgrep instead of ag:
 command! -bang -nargs=* Rg
-  \ call fzf#vim#grep(
-  \   'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>), 1,
-  \   <bang>0 ? fzf#vim#with_preview('up:60%')
-  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
-  \   <bang>0)
+			\ call fzf#vim#grep(
+			\   'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>), 1,
+			\   <bang>0 ? fzf#vim#with_preview('up:60%')
+			\           : fzf#vim#with_preview('right:50%:hidden', '?'),
+			\   <bang>0)
 
- 
+
 "}}}
 
+" typescript config {{{
+
+" The problem with this approach is that when you reload the buffer
+" TypeScriptConfig is called again and the autocommands it defines get stacked
+" up.
+"
+" There is also this approach ':%!prettier --write --use-tabs --parser typescript'
+" This suffers from losing the cursor position as does the existing solution
+" and there doesn't seems to be any way to simply fix that.
+"
+"function! FormatAndReloadBuffer()
+"	!prettier --write --use-tabs --parser typescript %
+"	edit
+"endfunction
+
+augroup typescript_config
+	autocmd!
+	autocmd filetype typescript call TypeScriptConfig()
+augroup END
+
+function! TypeScriptConfig()
+	" For this to work you need to have prettier
+	" 'npm install --global prettier'
+	setlocal formatprg=prettier\ --use-tabs\ --parser\ typescript tabstop=2
+	setlocal tabstop=2
+	" This applies this autocmd just to the buffer that triggered the filetype
+	" call to TypeScriptConfig we use normal with an exclamation mark since
+	" that means we use the default key mapping the mx places a mark and the
+	" `x moves us back to that mark. The middle part just fromats the whold
+	" file. The problem with the mark is after formatting you don't always
+	" move back to the exact same spot.
+	"autocmd BufWritePost <buffer> silent :normal! mxgggqG`x
+	"autocmd! BufWritePost <buffer> :call FormatAndReloadBuffer()
+
+	" This doesn't work cant chain os commands with vim commands using bar
+	"autocmd BufWritePost <buffer> :!prettier --write --use-tabs --parser typescript % | e
+endfunction
+"}}}
+
+
+" ArgWrap config {{{
+" Add a comma after last wraped argument, this is good for golang 
+" If I need more flexibility i can define b:argwrap_tail_comma in a buffer
+" local ft auto cmd
+let g:argwrap_tail_comma = 1
+" }}}
+
 endif 
+
+inoremap <c-j> <C-n>

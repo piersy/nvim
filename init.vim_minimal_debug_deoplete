@@ -1,19 +1,14 @@
-" plugins {{{
 call plug#begin()
-" Make sure you use single quotes.
 
-" Autocomplete
-Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
+Plug 'vim-airline/vim-airline'
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plug 'zchee/deoplete-go', { 'do': 'make'}
 
-" Add plugins to &runtimepath.
 call plug#end()
-"}}}
 
-" deoplete config {{{
-
-" enable deoplete
 let g:deoplete#enable_at_startup = 1
 
-"}}}
+set completeopt+=noinsert
+
 
 
