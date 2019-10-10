@@ -255,6 +255,8 @@ command! WRITE execute "w !sudo tee %"
 nnoremap <leader>s :<C-u>write<CR>
 nnoremap <leader>S :<C-u>WRITE<CR>
 
+vnoremap <leader>d :Linediff<CR>
+
 " Deletes the current buffer or quits if this is the last buffer.
 function! CloseBufferOrQuit()
 
