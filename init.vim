@@ -282,9 +282,9 @@ function! CloseBufferOrQuit()
 		"Otherwise delete that buffer.
 		"echom "deleting buffer"
 		if &buftype ==# ""
-			"If this is a normal window dont delete the associated window 
+			"If this is a normal window dont delete the associated window
 			Bdelete
-		else 
+		else
 			" else delete the buffer and window (for example this would apply
 			" to the quickfix window)
 			bdelete
@@ -367,7 +367,7 @@ nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 
 " set quickfix and previewwindow to be unlisted so that bn and bp do not
 " navigate to it and so that when I exit these windows do not stop vim from
-" closing. 
+" closing.
 augroup unlisted_buffers
 	autocmd!
 	" So we have to use 2 completely different ways of setting options for
@@ -445,7 +445,7 @@ endfunction
 
 " Strips trailing whitespace and makes sure the cursor returns to it's initial
 " position.
-function! <SID>StripTrailingWhitespaces()
+function! StripTrailingWhitespaces()
 	let l = line(".")
 	let c = col(".")
 	%s/\s\+$//e
@@ -533,7 +533,7 @@ let g:deoplete#enable_at_startup = 1
 " cursor into the complete options, this is for a later version
 call deoplete#custom#option({
 			\ 'ignore_sources': { 'go': ['around', 'buffer'] },
-			\ 'refresh_always': v:false, 
+			\ 'refresh_always': v:false,
 			\ 'camel_case'    : v:true,
 			\ 'smart_case'    : v:false,
 			\ 'min_pattern_length' : 1,
@@ -607,7 +607,7 @@ let g:neosnippet#enable_complete_done = 1
 " This sets neosnippet to complete functions in completion menu. Unfortunately
 " it breaks down when used with functions that return functions in go, which
 " is very annoying.
-"let g:neosnippet#enable_completed_snippet = 1 
+"let g:neosnippet#enable_completed_snippet = 1
 
 " Allow selecting autocomplete options/snippet segments with c-j Plugin
 " key-mappings.
@@ -650,7 +650,7 @@ inoremap <C-k> <C-p>
 inoremap <expr><CR> pumvisible() && empty(v:completed_item)? "\<c-n>\<c-y>\<ESC>" : "\<c-y>\<ESC>"
 " I thought this binding would be useful but actually its a bit of a pain to
 " use c-j to skipp snippet sections, tab is much easier and requires one hand.
-"imap <expr><C-j> pumvisible() ? "\<C-n>" : "\<Plug>(neosnippet_jump)" 
+"imap <expr><C-j> pumvisible() ? "\<C-n>" : "\<Plug>(neosnippet_jump)"
 
 " This binds TAB to jump to the next snippet jump point if there is one or
 " otherwise if ther is a menu visible insert the first entry if none selected
@@ -781,7 +781,7 @@ function! ToggleStar()
 	set iskeyword+=.
 	normal! bh
 	set iskeyword-=.
-		
+
 	" Check if we have a star and if so delete
 	if getline(".")[col(".")-1] == '*'
 		normal! x
@@ -831,7 +831,7 @@ function! ApplyVimGoMaps()
 
 	" Easy doc, rebinding this to quitall for now, i don't seem to use this
 	" binding much.
-	"nnoremap <buffer> <leader>q :<C-u>GoDoc<CR> 
+	"nnoremap <buffer> <leader>q :<C-u>GoDoc<CR>
 
 	" Easy referrers
 	nnoremap <buffer> <leader>u :<C-u>GoReferrers<CR>
@@ -987,12 +987,12 @@ endfunction
 
 
 " ArgWrap config {{{
-" Add a comma after last wraped argument, this is good for golang 
+" Add a comma after last wraped argument, this is good for golang
 " If I need more flexibility i can define b:argwrap_tail_comma in a buffer
 " local ft auto cmd
 let g:argwrap_tail_comma = 1
 " }}}
 
-endif 
+endif
 
 inoremap <c-j> <C-n>
