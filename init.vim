@@ -801,17 +801,17 @@ endfunction
 " Executed on a line with a function will propulate godoc for the line above
 " leaveing you in insert mode.
 function! PopulateGodoc()
-	" go to beginning of line then go foward a word then forward a char
-	normal! ^wh 
+	" go to beginning of line then go foward a word
+	normal! ^w
 	" if the current char is a bracket then goto the next bracket and then to
 	" the next word
 	if getline(".")[col(".")-1] == '('
 		normal! %w
 	endif
 	" we need to use execute here so that we can use ^[ as escape to be able
-	" to print. Yank the word open a line above add the comment followed by a
-	" space, print the word and append 2 spaces.
-	execute ":normal! ywO// pa  "
+	" to print. Yank the to the end of the word open a line above add the
+	" comment followed by a space, print the word and append 2 spaces.
+	execute ":normal! yeO// pa  "
 	" leve the caller in insert mode
 	startinsert
 endfunction
