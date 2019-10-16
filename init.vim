@@ -441,6 +441,55 @@ function! ConfigureHelp()
 endfunction
 "}}}
 
+" git rebase buffer key mappings {{{
+"
+" For refernence these are the filetypes set for git.
+" git
+" gitconfig
+" gitrebase
+" gitsendemail
+"
+function! OutputInGitWindow(cmdline)
+	" Open new vertical window
+	vert new
+	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap filetype=git
+	silent execute '$read !' . a:cmdline
+	" delete first line, since read always leaves a blank line see 
+	" https://vi.stackexchange.com/questions/14353/read-seems-to-bring-an-extra-line-how-to-prevent-this
+	0d_ 
+	1 " go to first line
+endfunction
+
+augroup gitrebase_maps
+	autocmd!
+	autocmd filetype gitrebase call ConfigureGitRebase()
+
+augroup END
+
+function! GetGitSha()
+	" Return first match in current line of 8 hex chars with a space at either
+	" end
+	return matchstr(getline("."),' \x\{8} ')
+endfunction
+
+function! ConfigureGitRebase()
+	" Map K again in buffer specific mode since it is mapped by vim by default
+	" to show the commit uner the cursor, it does this by setting keywordprg
+	" to 'git show'
+	nnoremap <buffer> K <C-U>
+	nnoremap <buffer> <leader>e :<C-u>call OutputInGitWindow('git show --stat '.GetGitSha())<CR>
+	nnoremap <buffer> <leader>d :<C-u>call OutputInGitWindow('git show '.GetGitSha())<CR>
+endfunction
+
+function! Teststuff()
+	let sha = GetGitSha()
+	if sha != ''
+		call s:OutputInGitWindow('git show --stat '.sha)
+	endif
+endfunction
+
+"pick 94507c2c 94507c2c Change to commitPhaseUpdateAcceptedComittedBallots
+" end gitrebase keymappings }}}
 
 " end genric key mappings }}}
 
