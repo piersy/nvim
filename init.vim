@@ -777,13 +777,29 @@ augroup END
 
 " Go back to beginning of current identifier and insert/delete the star *
 function! ToggleStar()
+	" Check to where we are
+	let prev_char = getline(".")[col(".")-2]
+
+	" we are at the beginning of a line
+	if prev_char == ''
+		normal! i*
+		normal! l
+		return
+	endif
+
 	" Save current position
 	let save_pos = getpos(".")
 
-	" Move to just before beginning of word including dots as word chars
-	set iskeyword+=.
-	normal! bh
-	set iskeyword-=.
+	" we are at the beginning of a word
+	if  prev_char == '*' || prev_char =~ '\s' 
+		" Just move to prev char
+		normal! h
+	else
+		" Move to just before beginning of word including dots as word chars
+		set iskeyword+=.
+		normal! bh
+		set iskeyword-=.
+	endif
 
 	" Check if we have a star and if so delete
 	if getline(".")[col(".")-1] == '*'
