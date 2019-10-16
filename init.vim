@@ -152,6 +152,9 @@ set foldmethod=marker
 " changes.
 set autoread
 
+" Make new windows appear on the right
+set splitright
+
 " history options {{{
 
 " Protect changes between writes. Default values of
