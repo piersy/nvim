@@ -29,11 +29,15 @@ Plug 'nixprime/cpsm', { 'do': 'bash install.sh' }
 
 Plug 'guns/xterm-color-table.vim'
 
-Plug 'Shougo/neosnippet.vim'
-Plug 'Shougo/neosnippet-snippets'
+"Plug 'Shougo/neosnippet.vim'
+"Plug 'Shougo/neosnippet-snippets'
 
 " Add automatic parentheses to completion (only works with deoplete)
 "Plug 'Shougo/neopairs.vim'
+
+" Add automatic parentheses closing
+Plug 'jiangmiao/auto-pairs'
+
 
 " Snippet support
 "Plug 'SirVer/ultisnips'
@@ -654,7 +658,7 @@ call deoplete#custom#source('_',  'max_kind_width', 0)
 "inoremap <expr><C-Space> deoplete#mappings#manual_complete()
 
 " This auto expands snippets when the completion menu closes.
-let g:neosnippet#enable_complete_done = 1
+"let g:neosnippet#enable_complete_done = 1
 
 " This sets neosnippet to complete functions in completion menu. Unfortunately
 " it breaks down when used with functions that return functions in go, which
@@ -707,8 +711,8 @@ inoremap <expr><CR> pumvisible() && empty(v:completed_item)? "\<c-n>\<c-y>\<ESC>
 " This binds TAB to jump to the next snippet jump point if there is one or
 " otherwise if ther is a menu visible insert the first entry if none selected
 " or the selected entry otherwise, and otherwise insert a tab.
-imap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? empty(v:completed_item)? "\<c-n>\<c-y>" : "\<c-y>" : "\<TAB>"
-smap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? empty(v:completed_item)? "\<c-n>\<c-y>" : "\<c-y>" : "\<TAB>"
+"imap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? empty(v:completed_item)? "\<c-n>\<c-y>" : "\<c-y>" : "\<TAB>"
+"smap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? empty(v:completed_item)? "\<c-n>\<c-y>" : "\<c-y>" : "\<TAB>"
 
 " this prevents the weird markers being displayed
 if has('conceal')
