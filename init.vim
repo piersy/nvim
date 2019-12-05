@@ -42,9 +42,6 @@ Plug 'jiangmiao/auto-pairs'
 " Snippet support
 "Plug 'SirVer/ultisnips'
 
-" Go sources for deoplete
-Plug 'zchee/deoplete-go', { 'do': 'make'}
-
 " Language server
 Plug 'autozimu/LanguageClient-neovim', {
 			\ 'branch': 'next',
@@ -54,9 +51,6 @@ Plug 'autozimu/LanguageClient-neovim', {
 " golang plugins
 "Plug 'fatih/vim-go', { 'tag': 'v1.19' }
 Plug 'fatih/vim-go'
-
-" refactoring support for go files
-Plug 'godoctor/godoctor.vim' "doesn't play well with 2 gopaths
 
 " Nice parentheses
 Plug 'kien/rainbow_parentheses.vim'
@@ -585,148 +579,9 @@ endfunction
 " enable deoplete
 let g:deoplete#enable_at_startup = 1
 
-" ignore the around source which adds random complete words from around the
-" cursor into the complete options, this is for a later version
-call deoplete#custom#option({
-			\ 'ignore_sources': { 'go': ['around', 'buffer'] },
-			\ 'refresh_always': v:false,
-			\ 'camel_case'    : v:true,
-			\ 'smart_case'    : v:false,
-			\ 'min_pattern_length' : 1,
-			\})
-call deoplete#custom#source('_',  'max_menu_width', 0)
-call deoplete#custom#source('_',  'max_abbr_width', 0)
-call deoplete#custom#source('_',  'max_kind_width', 0)
-
-"\ 'smart_case'    : v:true, // when you want to search for ccccCCCC smart
-"case becomes annoying where camel case shouldn't
-
-" skip_chars stop completion when entered except if the skip char adds to a
-" word that makes it a perfect match eg skip char n and the completion is sign
-" and you are at sig and you type sign. Otherwise completion stops with a
-" skipChar the defualt value is brackets
-
-" converter_remove_overlap will truncate the inserted candidate in the case
-" that the the text following the cursor position
-"
-" When inserting a candidate if the text following the cursor position matches
-" the tail of the candidate the candidate will be truncated to remove that
-" tail, such that you end up with just the required candidate rather than
-" duplicating the tail.
-
-"call deoplete#custom#source('_', 'converters',
-"		\ ['converter_auto_paren','remove_overlap'])
-
-"call deoplete#custom#source('_', 'converters',
-"		\ ['converter_auto_delimiter', 'remove_overlap'])
-
-"call deoplete#custom#source('_', 'converters',
-"\ ['converter_auto_delimiter'])
-
-
-
-"	call deoplete#custom#filter('attrs_order', {
-"	\ 'javascript': {
-"	\    		'kind': [
-"	\			'Function',
-"	\			'Property'
-"	\			]
-"	\ },
-"	\})
-
-"call deoplete#custom#option('sources', {
-"\ '_': ['file'],
-"\ 'min_pattern_length' : 1,
-"\})
-
-
-
-"call deoplete#custom#option('candidate_marks',
-"      \ ['A'])
-"inoremap <expr>A       deoplete#insert_candidate(0)
-
-" Auto insert parentheses
-"let g:neopairs#enable = 1
-"call deoplete#custom#source('_', 'converters', ['converter_auto_paren', 'converter_remove_overlap'])
-
-" This seems to be the best of the bunch, changed my mind on this, it doesn't
-" give good suggestions.
-"call deoplete#custom#source('_', 'matchers', ['matcher_cpsm'])
-"call deoplete#custom#source('_', 'sorters', [])
-
-" Set ctrl+space to show completion menu.
-"inoremap <expr><C-Space> deoplete#mappings#manual_complete()
-
-" This auto expands snippets when the completion menu closes.
-"let g:neosnippet#enable_complete_done = 1
-
-" This sets neosnippet to complete functions in completion menu. Unfortunately
-" it breaks down when used with functions that return functions in go, which
-" is very annoying.
-"let g:neosnippet#enable_completed_snippet = 1
-
-" Allow selecting autocomplete options/snippet segments with c-j Plugin
-" key-mappings.
-" Note: You must use "imap" and "smap" for the Plug commands.
-
 " navigate the menu with cj and ck
 inoremap <C-j> <C-n>
 inoremap <C-k> <C-p>
-
-"Causes the first entry to be selected by default in the popup menu.
-"set completeopt+=noinsert
-"Unfortunately the above this does not play well with deoplete
-"deoplete-go and airline-vim, the three plugins together plus this cause
-"problems.
-"
-"For now I will mimic noinsert with the below
-" 1. when pumvisible & entry selected, which is a snippet, <CR> triggers snippet expansion,
-" 2. when pumvisible & entry selected, which is not a snippet, <CR> only closes pum
-" 3. when pumvisible & no entry selected, <CR> closes pum and inserts newline
-" 4. when pum not visible, <CR> inserts only a newline
-"function! s:ExpandSnippetOrClosePumOrReturnNewline()
-"    if pumvisible()
-"        if !empty(v:completed_item)
-"            let snippet = UltiSnips#ExpandSnippet()
-"            if g:ulti_expand_res > 0
-"                return snippet
-"            else
-"                return "\<C-y>"
-"            endif
-"        else
-"            return "\<C-y>\<CR>"
-"        endif
-"    else
-"        return "\<CR>"
-"    endif
-"endfunction
-
-" map enter to select insert the first entry if none selected or the selected
-" entry otherwise and esc.
-inoremap <expr><CR> pumvisible() && empty(v:completed_item)? "\<c-n>\<c-y>\<ESC>" : "\<c-y>\<ESC>"
-" I thought this binding would be useful but actually its a bit of a pain to
-" use c-j to skipp snippet sections, tab is much easier and requires one hand.
-"imap <expr><C-j> pumvisible() ? "\<C-n>" : "\<Plug>(neosnippet_jump)"
-
-" This binds TAB to jump to the next snippet jump point if there is one or
-" otherwise if ther is a menu visible insert the first entry if none selected
-" or the selected entry otherwise, and otherwise insert a tab.
-"imap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? empty(v:completed_item)? "\<c-n>\<c-y>" : "\<c-y>" : "\<TAB>"
-"smap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? empty(v:completed_item)? "\<c-n>\<c-y>" : "\<c-y>" : "\<TAB>"
-
-" this prevents the weird markers being displayed
-if has('conceal')
-	set conceallevel=2 concealcursor=niv
-endif
-
-
-" Let dot trigger completion - causes problems when you actually just want to
-" enter a dot.
-"inoremap <expr>. pumvisible() && empty(v:completed_item) ? "\<C-n>." : "."
-
-" Let comma trigger completion, this is causing a lot of problems when
-" inputting parameters. So disabled
-" inoremap <expr>, pumvisible() && empty(v:completed_item) ? "\<C-n>," : ","
 
 "}}}
 
@@ -768,16 +623,19 @@ let g:LanguageClient_serverCommands = {
 			\ 'typescript': ['node', '/home/piers/projects/javascript-typescript-langserver/lib/language-server-stdio', '-t', '-l', '/dev/null'],
 			\ 'cpp': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
 			\ 'c': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
+			\ 'go': ['gopls'],
 			\ }
 
 " Unfortunately this seems to conflict with deoplete and causes the completion
 " menu to update while cycling through completions.
 "    \ 'go': ['go-langserver'],
 
+" Run gofmt on save
+autocmd BufWritePre *.go :call LanguageClient#textDocument_formatting_sync()
 
 augroup language_client_maps
 	autocmd!
-	autocmd filetype c,cpp,javascript,typescript call ApplyLanguageClientMaps()
+	autocmd filetype go,c,cpp,javascript,typescript call ApplyLanguageClientMaps()
 augroup END
 
 function! ApplyLanguageClientMaps()
@@ -794,7 +652,8 @@ endfunction
 " Dont use the location list
 let g:go_list_type = "quickfix"
 
-"Use go imports on save
+"Use go imports on save, this should really be supported by gopls with
+"language client neovim but currently is not
 let g:go_fmt_command = "goimports"
 
 " Exclude protobuf generated files from metalinter.
@@ -905,16 +764,6 @@ function! ApplyVimGoMaps()
 	" binding much.
 	"nnoremap <buffer> <leader>q :<C-u>GoDoc<CR>
 
-	" Easy referrers
-	nnoremap <buffer> <leader>u :<C-u>GoReferrers<CR>
-
-	" make the jump to def (d for def) shortcut easier.
-	nnoremap <buffer> <leader>d :<C-u>GoDef<CR>
-
-	" make the return to start (r for return) shortcut easier.
-
-	" make the go alternate shortcut easier.
-	nnoremap <buffer> <leader>a :<C-u>GoAlternate<CR>
 
 	" Map K again in buffer specific mode since it is mapped by go
 	" to get the doc.
@@ -923,6 +772,7 @@ function! ApplyVimGoMaps()
 	Arpeggio inoremap <buffer> kl <ESC>:<C-u>call BuildGoFiles()<CR>
 	Arpeggio nnoremap <buffer> kl :<C-u>call BuildGoFiles()<CR>
 
+	" Fuzzy find through the declarations in file
 	nnoremap <buffer> <leader>g :<C-u>GoDecls<CR>
 	nnoremap <buffer> <leader>p :<C-u>ArgWrap<CR>
 
