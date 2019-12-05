@@ -466,7 +466,7 @@ endfunction
 
 augroup gitrebase_maps
 	autocmd!
-	autocmd filetype gitrebase call ConfigureGitRebase()
+	autocmd filetype git*,fugitiveblame call ConfigureGitRebase()
 
 augroup END
 
