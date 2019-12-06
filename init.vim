@@ -23,30 +23,30 @@ Plug 'tomlion/vim-solidity'
 " Surround text objects with more text
 Plug 'tpope/vim-surround'
 
-" Autocomplete
-Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
-Plug 'nixprime/cpsm', { 'do': 'bash install.sh' }
-
 Plug 'guns/xterm-color-table.vim'
 
 "Plug 'Shougo/neosnippet.vim'
 "Plug 'Shougo/neosnippet-snippets'
 
-" Add automatic parentheses to completion (only works with deoplete)
-"Plug 'Shougo/neopairs.vim'
-
 " Add automatic parentheses closing
 Plug 'jiangmiao/auto-pairs'
-
-
-" Snippet support
-"Plug 'SirVer/ultisnips'
 
 " Language server
 Plug 'autozimu/LanguageClient-neovim', {
 			\ 'branch': 'next',
 			\ 'do': 'bash install.sh',
 			\ }
+
+" nvim completion manager - requires roxma to load its plugins
+Plug 'ncm2/ncm2' | Plug 'roxma/nvim-yarp'
+
+" NOTE: you need to install completion sources to get completions. Check
+" our wiki page for a list of sources: https://github.com/ncm2/ncm2/wiki
+" These are completion sources
+Plug 'ncm2/ncm2-bufword'
+Plug 'ncm2/ncm2-path'
+" This should give parameter expansion for ncm2
+Plug 'ncm2/ncm2-ultisnips' | Plug 'SirVer/ultisnips'
 
 " golang plugins
 "Plug 'fatih/vim-go', { 'tag': 'v1.19' }
@@ -409,6 +409,10 @@ command! Cprev try | cprev | catch | clast | catch | endtry
 nnoremap <C-l> :<C-u>Cnext<CR>
 nnoremap <C-h> :<C-u>Cprev<CR>
 
+" navigate the pop up menu with cj and ck
+inoremap <C-j> <C-n>
+inoremap <C-k> <C-p>
+
 " Remap b for split keyboard
 nnoremap m b
 nnoremap M B
@@ -576,14 +580,13 @@ function! ConfigureAndroidManifest()
 endfunction
 "}}}
 
-" deoplete config {{{
+" ncm2 config {{{
 
-" enable deoplete
-let g:deoplete#enable_at_startup = 1
+" enable ncm2 for all buffers
+autocmd BufEnter * call ncm2#enable_for_buffer()
 
-" navigate the menu with cj and ck
-inoremap <C-j> <C-n>
-inoremap <C-k> <C-p>
+" IMPORTANT: :help Ncm2PopupOpen for more information
+set completeopt=noinsert,menuone,noselect
 
 "}}}
 
