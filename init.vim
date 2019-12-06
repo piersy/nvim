@@ -503,6 +503,16 @@ function! StripTrailingWhitespaces()
 	%s/\s\+$//e
 	call cursor(l, c)
 endfun
+
+" Not sure how this works but it matches trailing whitespace when in normal
+" mode for vim files, mainly needed for thsi file when I add a keymapping and
+" unintentionally leave trailing whitespace.
+highlight ExtraWhitespace ctermbg=red guibg=red
+autocmd BufWinEnter vim match ExtraWhitespace /\s\+$/
+autocmd InsertEnter vim match ExtraWhitespace /\s\+\%#\@<!$/
+autocmd InsertLeave vim match ExtraWhitespace /\s\+$/
+autocmd BufWinLeave vim call clearmatches()
+
 "}}}
 
 " netrw buffer key mappings {{{
