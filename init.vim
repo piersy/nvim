@@ -346,7 +346,9 @@ Arpeggio nnoremap po :<C-u>!echo -ne '\007'<CR><CR>
 " entries from autocomplete. This gets annoying if you have your min pattern
 " length set to one and you want to just insert a newline.
 "Arpeggio inoremap <expr>jk pumvisible() ? "\<C-n>" : "<CR>"
-Arpeggio inoremap jk <CR>
+
+" We need imap here so that autopairs works since autopairs has bound itslef to <CR>
+Arpeggio imap jk <CR>
 Arpeggio cnoremap jk <CR>
 Arpeggio nnoremap jk <CR>
 "
