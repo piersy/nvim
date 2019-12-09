@@ -47,6 +47,7 @@ Plug 'ncm2/ncm2-bufword'
 Plug 'ncm2/ncm2-path'
 " This should give parameter expansion for ncm2
 Plug 'ncm2/ncm2-ultisnips' | Plug 'SirVer/ultisnips'
+Plug 'ncm2/float-preview.nvim'
 
 " golang plugins
 "Plug 'fatih/vim-go', { 'tag': 'v1.19' }
@@ -587,6 +588,9 @@ autocmd BufEnter * call ncm2#enable_for_buffer()
 
 " IMPORTANT: :help Ncm2PopupOpen for more information
 set completeopt=noinsert,menuone,noselect
+
+" Set float-preview to be displayed next to autocomplete
+let g:float_preview#docked = 0
 
 "}}}
 
