@@ -24,8 +24,8 @@ Plug 'tomlion/vim-solidity'
 Plug 'tpope/vim-surround'
 
 " Autocomplete
-Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
-Plug 'nixprime/cpsm', { 'do': 'bash install.sh' }
+"Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
+"Plug 'nixprime/cpsm', { 'do': 'bash install.sh' }
 
 Plug 'guns/xterm-color-table.vim'
 
@@ -36,21 +36,25 @@ Plug 'guns/xterm-color-table.vim'
 "Plug 'Shougo/neopairs.vim'
 
 " Add automatic parentheses closing
-Plug 'jiangmiao/auto-pairs'
+"Plug 'jiangmiao/auto-pairs'
 
 
 " Snippet support
-"Plug 'SirVer/ultisnips'
+Plug 'SirVer/ultisnips'
 
 " Language server
-Plug 'autozimu/LanguageClient-neovim', {
-			\ 'branch': 'next',
-			\ 'do': 'bash install.sh',
-			\ }
+"Plug 'autozimu/LanguageClient-neovim', {
+"			\ 'branch': 'next',
+"			\ 'do': 'bash install.sh',
+"			\ }
+
+" Conquerer of code, ide like plugin with diagnostics and autocomplete with
+" lang server support.
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " golang plugins
-"Plug 'fatih/vim-go', { 'tag': 'v1.19' }
-Plug 'fatih/vim-go'
+"
+Plug 'fatih/vim-go', {'tag': 'v1.18' }
 
 " Nice parentheses
 Plug 'kien/rainbow_parentheses.vim'
@@ -91,11 +95,14 @@ Plug 'AndrewRadev/linediff.vim'
 " Wrap arguments on functions with :ArgWrap
 Plug 'FooSoft/vim-argwrap'
 
+Plug 'piersy/potion-vim'
+Plug 'piersy/vim-rebase-view'
+
+Plug 'tpope/vim-eunuch'
 " Add plugins to &runtimepath.
 call plug#end()
 "}}}
 if isdirectory($HOME . "/.config/nvim/plugged")
-
 "let g:python3_host_prog="/usr/local/bin/python3.5"
 "let g:python3_host_prog = "/usr/local/bin/python3.5"
 " Arpeggio needs to be loaded as the init.vim is parsed so that
@@ -109,6 +116,8 @@ colorscheme molokai
 " Work around for broken xfce4-terminal stops garbage characters being printed
 " in neovim 0.2.2+
 set guicursor=
+
+set shortmess-=F
 
 " generic vim options {{{
 set errorbells
@@ -153,6 +162,35 @@ set autoread
 " Make new windows appear on the right
 set splitright
 
+"augroup help_setup
+"	autocmd!
+"	autocmd FileType help setlocal buflisted
+"	autocmd filetype help call ApplyHelpSetup()
+"augroup END
+"
+"function! ApplyHelpSetup()
+"	autocmd BufEnter <buffer> setlocal conceallevel=2 | echom "enterning"
+"endfunction
+
+" Make help buffers be listed as normal buffers and ensure that the
+" conceallevel is maintained. I'm not sure why but when setting a help buffer
+" to be listed, navigating away from it and back again seems to reset the
+" conceallevel and conceal cursor settings.
+autocmd! FileType help autocmd BufEnter <buffer> setlocal buflisted | setlocal conceallevel=2 | setlocal concealcursor=nc
+
+" This command calls help and ensures that it uses the only available window,
+" we need to use execute since <f-args> are the quoted arguments provided by
+" the user and help topics cannot be quoted when calling help. By using
+" execute I guess the quoted arg is just bundled into the string unquoted.
+command! -nargs=1 -complete=help Help execute 'help ' .  <f-args> . '| only'
+
+" Ensure that help gets expanded to Help onthe commandline
+cnoreabbrev <expr> h getcmdtype() == ":" && getcmdline() == 'h' ? 'Help' : 'h'
+cnoreabbrev <expr> he getcmdtype() == ":" && getcmdline() == 'he' ? 'Help' : 'he'
+cnoreabbrev <expr> hel getcmdtype() == ":" && getcmdline() == 'hel' ? 'Help' : 'hel'
+cnoreabbrev <expr> help getcmdtype() == ":" && getcmdline() == 'help' ? 'Help' : 'help'
+
+
 " history options {{{
 
 " Protect changes between writes. Default values of
@@ -161,7 +199,7 @@ set splitright
 set swapfile
 
 " protect against crash-during-write
-set writebackup
+set nowritebackup
 " but do not persist backup after successful write
 set nobackup
 " use rename-and-write-new method whenever safe
@@ -284,11 +322,13 @@ function! CloseBufferOrQuit()
 		"echom "deleting buffer"
 		if &buftype ==# ""
 			"If this is a normal window dont delete the associated window
-			Bdelete
+			"Bwipeout totally removes the buffer so it does not become an
+			"unlisted buffer.
+			Bwipeout
 		else
 			" else delete the buffer and window (for example this would apply
 			" to the quickfix window)
-			bdelete
+			bwipeout
 		endif
 	endif
 endfunction
@@ -449,46 +489,70 @@ endfunction
 " gitrebase
 " gitsendemail
 "
-function! OutputInGitWindow(cmdline)
-	" Open new vertical window
-	vert new
-	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap filetype=git
-	silent execute '$read !' . a:cmdline
-	" delete first line, since read always leaves a blank line see 
-	" https://vi.stackexchange.com/questions/14353/read-seems-to-bring-an-extra-line-how-to-prevent-this
-	0d_ 
-	1 " go to first line
-endfunction
+"function! s:OutputInGitWindow(cmdline)
+"	" Open new vertical window
+"	vert new
+"	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap filetype=git
+"	file "" . a:cmdline
+"
+"	" Name the buffer with the command we executed.
+"	" In order to call file with an argument we need to use execute. This is
+"	" becuause file doesn't accept variables as its arguments. We can infer
+"	" this from the doc since commands that can interpret variables (eg echo)
+"	" use '{expr}' to refer to their arguments whereas file doc simply lists
+"	" '{name}'. 
+"	silent execute 'file Command: ' . a:cmdline
+"
+"	"0read makes read insert text below the 0th line
+"	silent execute '0read !' . a:cmdline
+"	1 " go to first line
+"endfunction
+"function! s:GetGitSha()
+"	" Return first match in current line of 8 hex chars with a space at either
+"	" end
+"	return trim(matchstr(getline("."),' \x\{7} '))
+"endfunction
+"
+"function! s:GetShaRange()
+"	" Return first match in current line of 8 hex chars with a space at either
+"	" end
+"	"GetGitSha
+"	"# Rebase 056af67..ef7b34d onto 056af67 (4 commands)
+"	let line=search('\v# Rebase \x{7}\.\.\x{7} onto \x{7} \(\d+ commands\)')
+"	return matchstr(getline(line), '\v\x{7}\.\.\x{7}')
+"endfunction
+"
+"function! s:DisplayCommit(options)
+"	let commitsha = s:GetGitSha()
+"	if commitsha != ""
+"		call s:OutputInGitWindow('git show ' . a:options .' '. commitsha)
+"	endif
+"endfunction
+
+"function! s:DisplayLog(options)
+"	let range = s:GetShaRange()
+"	if range != ""
+"		call s:OutputInGitWindow('git log --reverse ' . a:options . ' ' . range)
+"	endif
+"endfunction
+"
 
 augroup gitrebase_maps
 	autocmd!
-	autocmd filetype git*,fugitiveblame call ConfigureGitRebase()
-
+	autocmd filetype gitrebase call s:ConfigureGitRebase()
 augroup END
 
-function! GetGitSha()
-	" Return first match in current line of 8 hex chars with a space at either
-	" end
-	return matchstr(getline("."),' \x\{8} ')
-endfunction
-
-function! ConfigureGitRebase()
+function! s:ConfigureGitRebase()
 	" Map K again in buffer specific mode since it is mapped by vim by default
 	" to show the commit uner the cursor, it does this by setting keywordprg
 	" to 'git show'
 	nnoremap <buffer> K <C-U>
-	nnoremap <buffer> <leader>e :<C-u>call OutputInGitWindow('git show --stat '.GetGitSha())<CR>
-	nnoremap <buffer> <leader>d :<C-u>call OutputInGitWindow('git show '.GetGitSha())<CR>
+	nnoremap <silent> <buffer> <leader>e :<C-u>call rebaseview#DisplayCommit('--stat')<CR>
+	nnoremap <silent> <buffer> <leader>d :<C-u>call rebaseview#DisplayCommit('')<CR>
+	nnoremap <silent> <buffer> <leader>l :<C-u>call rebaseview#DisplayLog('--stat')<CR>
 endfunction
 
-function! Teststuff()
-	let sha = GetGitSha()
-	if sha != ''
-		call s:OutputInGitWindow('git show --stat '.sha)
-	endif
-endfunction
 
-"pick 94507c2c 94507c2c Change to commitPhaseUpdateAcceptedComittedBallots
 " end gitrebase keymappings }}}
 
 " end genric key mappings }}}
@@ -589,7 +653,7 @@ endfunction
 " deoplete config {{{
 
 " enable deoplete
-let g:deoplete#enable_at_startup = 1
+"let g:deoplete#enable_at_startup = 1
 
 " navigate the menu with cj and ck
 inoremap <C-j> <C-n>
@@ -624,40 +688,80 @@ let g:airline#extensions#tabline#fnamemod = ':t'
 "}}}
 
 " UtilSnip config {{{
-let g:UltiSnipsExpandTrigger="<CR>"
-let g:UltiSnipsJumpForwardTrigger="<CR>"
-let g:UltiSnipsJumpBackwardTrigger="<C-H>"
+let g:UltiSnipsExpandTrigger="<NUL>"
+"let g:UltiSnipsJumpForwardTrigger="<CR>"
+"let g:UltiSnipsJumpBackwardTrigger="<C-H>"
 "}}}
 
-" LanguageClient config {{{
-let g:LanguageClient_serverCommands = {
-			\ 'javascript': ['node', '/home/piers/projects/javascript-typescript-langserver/lib/language-server-stdio', '-l', '/dev/null'],
-			\ 'typescript': ['node', '/home/piers/projects/javascript-typescript-langserver/lib/language-server-stdio', '-t', '-l', '/dev/null'],
-			\ 'cpp': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
-			\ 'c': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
-			\ 'go': ['gopls'],
-			\ }
+" coc nvim config {{{
 
-" Unfortunately this seems to conflict with deoplete and causes the completion
-" menu to update while cycling through completions.
-"    \ 'go': ['go-langserver'],
+" coc nvim suggests these settings  
 
-" Run gofmt on save
-autocmd BufWritePre *.go :call LanguageClient#textDocument_formatting_sync()
+" Some servers have issues with backup files, see #649
+set nowritebackup
+set nobackup
+" Better display for messages
+set cmdheight=2
 
-augroup language_client_maps
+" You will have bad experience for diagnostic messages when it's default 4000.
+set updatetime=300
+
+" don't give |ins-completion-menu| messages.
+set shortmess+=c
+
+" always show signcolumns
+set signcolumn=yes
+
+" Remap keys for gotos
+"let g:LanguageClient_serverCommands = {
+"			\ 'javascript': ['node', '/home/piers/projects/javascript-typescript-langserver/lib/language-server-stdio', '-l', '/dev/null'],
+"			\ 'typescript': ['node', '/home/piers/projects/javascript-typescript-langserver/lib/language-server-stdio', '-t', '-l', '/dev/null'],
+"			\ 'cpp': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
+"			\ 'c': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
+"			\ 'go': ['gopls'],
+"			\ }
+augroup coc_vim_setup
 	autocmd!
-	autocmd filetype go,c,cpp,javascript,typescript call ApplyLanguageClientMaps()
+	autocmd filetype go,c,cpp,javascript,typescript call ApplyCocVimSetup()
 augroup END
 
-function! ApplyLanguageClientMaps()
-	nnoremap <silent> <buffer> <leader>d :<C-u>call LanguageClient#textDocument_definition()<CR>
-	nnoremap <silent> <buffer> <leader>h :<C-u>call LanguageClient#textDocument_hover()<CR>
-	nnoremap <silent> <buffer> <leader>u :<C-u>call LanguageClient#textDocument_references()<CR>
-	nnoremap <silent> <buffer> <leader>g :<C-u>call LanguageClient#textDocument_documentSymbol()<CR>
-	nnoremap <silent> <buffer> <leader>r :<C-u>call LanguageClient_textDocument_rename()<CR>
+function! s:show_documentation()
+  " check to see if filetype is vim or help
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+function! ApplyCocVimSetup()
+	nmap <silent> <buffer> <leader>d <Plug>(coc-definition)
+	"nnoremap <silent> <buffer> <leader>h :<C-u>call LanguageClient#textDocument_hover()<CR>
+	nmap <silent> <buffer> <leader>u <Plug>(coc-references)
+	"nnoremap <silent> <buffer> <leader>g :<C-u>call LanguageClient#textDocument_documentSymbol()<CR>
+	nmap <silent> <buffer> <leader>r <Plug>(coc-rename)
+	" Use K to show documentation in preview window
+	nnoremap <silent> <buffer> <leader>h :call <SID>show_documentation()<CR>
+	"nmap <silent> gy <Plug>(coc-type-definition)
+	"nmap <silent> gi <Plug>(coc-implementation)
+	
+	inoremap <expr> <cr> pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
+	inoremap <expr> <esc> pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
+	
+	" So in order to compose the filetype and the CursorHold events we need to
+	" use an augroup in an augroup so that we can reliably clear previous
+	" autocmds. Without this augroup the cursor hold event is set every time
+	" a buffer of the filetypes defined above is entered. This can lead to
+	" multiple events being fired for cursor hold which causes flickering.
+	augroup coc_vim_cursor_hold
+		autocmd!
+		" Highlight symbol under cursor on CursorHold
+		autocmd CursorHold <buffer> silent call CocActionAsync('highlight') 
+	augroup END
+
 endfunction
 "}}}
+
 
 " vim-go config {{{
 
@@ -918,7 +1022,6 @@ function! TypeScriptConfig()
 	"autocmd BufWritePost <buffer> :!prettier --write --use-tabs --parser typescript % | e
 endfunction
 "}}}
-
 
 " ArgWrap config {{{
 " Add a comma after last wraped argument, this is good for golang

@@ -1,0 +1,17 @@
+{
+	"snippets.ultisnips.directories": [
+		"UltiSnips",
+		"gosnippets/UltiSnips"
+	],
+	"languageserver": {
+		"golang": {
+			"command": "gopls",
+			"args": ["-logfile", "goplslog", "-rpc.trace", "-v", "-debug", "localhost:9999"],
+			"rootPatterns": ["go.mod"],
+			"filetypes": ["go"]
+		}
+	},
+	// This prevents the preview window displayed by the location list
+	// and allows me to use my normal approach of jumping through the quickfix.
+	"coc.preferences.useQuickfixForLocations": true
+}
