@@ -40,7 +40,7 @@ Plug 'guns/xterm-color-table.vim'
 
 
 " Snippet support
-Plug 'SirVer/ultisnips'
+"Plug 'SirVer/ultisnips'
 
 " Language server
 "Plug 'autozimu/LanguageClient-neovim', {
@@ -102,6 +102,11 @@ Plug 'tpope/vim-eunuch'
 " Add plugins to &runtimepath.
 call plug#end()
 "}}}
+
+" abbreviations {{{
+iabbrev netowrk network
+"}}}
+
 if isdirectory($HOME . "/.config/nvim/plugged")
 "let g:python3_host_prog="/usr/local/bin/python3.5"
 "let g:python3_host_prog = "/usr/local/bin/python3.5"
@@ -296,6 +301,12 @@ nnoremap <leader>S :<C-u>WRITE<CR>
 
 vnoremap <leader>d :Linediff<CR>
 
+
+" Close all other buffers
+command! BufOnly silent! execute "%bd|e#|bd#"
+
+nnoremap <leader>a :<c-u>BufOnly<cr>
+
 " Deletes the current buffer or quits if this is the last buffer.
 function! CloseBufferOrQuit()
 
@@ -387,8 +398,7 @@ Arpeggio nnoremap po :<C-u>!echo -ne '\007'<CR><CR>
 " length set to one and you want to just insert a newline.
 "Arpeggio inoremap <expr>jk pumvisible() ? "\<C-n>" : "<CR>"
 
-" We need imap here so that autopairs works since autopairs has bound itslef to <CR>
-Arpeggio imap jk <CR>
+Arpeggio inoremap jk <CR>
 Arpeggio cnoremap jk <CR>
 Arpeggio nnoremap jk <CR>
 "
@@ -465,6 +475,9 @@ nnoremap \ @:
 inoremap  <C-W>
 
 " help buffer key mappings {{{
+
+" Toggle help filetype
+nnoremap <expr> <tab> &ft == "help" ? ":set ft=<cr>" : ":set ft=help<cr>"
 " help mappings have to be set here otherwise they are overwritten with more
 " buffer specific maps
 augroup help_maps
@@ -537,20 +550,35 @@ endfunction
 "endfunction
 "
 
-augroup gitrebase_maps
+augroup rebase_keymaps
 	autocmd!
-	autocmd filetype gitrebase call s:ConfigureGitRebase()
+	autocmd filetype gitrebase call s:ConfigureRebaseKeymaps()
 augroup END
 
-function! s:ConfigureGitRebase()
+function! s:ConfigureRebaseKeymaps()
 	" Map K again in buffer specific mode since it is mapped by vim by default
 	" to show the commit uner the cursor, it does this by setting keywordprg
 	" to 'git show'
 	nnoremap <buffer> K <C-U>
-	nnoremap <silent> <buffer> <leader>e :<C-u>call rebaseview#DisplayCommit('--stat')<CR>
-	nnoremap <silent> <buffer> <leader>d :<C-u>call rebaseview#DisplayCommit('')<CR>
-	nnoremap <silent> <buffer> <leader>l :<C-u>call rebaseview#DisplayLog('--stat')<CR>
+	nnoremap <silent> <buffer> <leader>e :call rebaseview#DisplayCommit('--stat')<CR>
+	nnoremap <silent> <buffer> <leader>d :call rebaseview#DisplayCommit('')<CR>
+	nnoremap <silent> <buffer> <leader>l :call rebaseview#DisplayLog('--stat')<CR>
 endfunction
+
+"augroup gitrebase_maps
+"	autocmd!
+"	autocmd filetype gitrebase call s:ConfigureGitRebase()
+"augroup END
+"
+"function! s:ConfigureGitRebase()
+"	" Map K again in buffer specific mode since it is mapped by vim by default
+"	" to show the commit uner the cursor, it does this by setting keywordprg
+"	" to 'git show'
+"	nnoremap <buffer> K <C-U>
+"	nnoremap <silent> <buffer> <leader>e :call rebaseview#DisplayCommit('--stat')<CR>
+"	nnoremap <silent> <buffer> <leader>d :call rebaseview#DisplayCommit('')<CR>
+"	nnoremap <silent> <buffer> <leader>l :call rebaseview#DisplayLog('--stat')<CR>
+"endfunction
 
 
 " end gitrebase keymappings }}}
@@ -568,14 +596,18 @@ function! StripTrailingWhitespaces()
 	call cursor(l, c)
 endfun
 
-" Not sure how this works but it matches trailing whitespace when in normal
-" mode for vim files, mainly needed for thsi file when I add a keymapping and
-" unintentionally leave trailing whitespace.
+" Highlight trainling spaces red, its important that this matches '*' since it
+" is applied to window's rather than buffers, so we need to ensure that any
+" open window gets the same treatment. If I wanted to apply this to certain
+" buffers only then I would need to change the events to work on buffers.
 highlight ExtraWhitespace ctermbg=red guibg=red
-autocmd BufWinEnter vim match ExtraWhitespace /\s\+$/
-autocmd InsertEnter vim match ExtraWhitespace /\s\+\%#\@<!$/
-autocmd InsertLeave vim match ExtraWhitespace /\s\+$/
-autocmd BufWinLeave vim call clearmatches()
+autocmd! BufWinEnter * match ExtraWhitespace /\s\+$/
+" This line stops matching trainling whitespace on the line with the cursor.
+" '\%#' matches the cursor and '\@<!' requires the prior token to not match in
+" order for the pattern to match.
+autocmd! InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+autocmd! InsertLeave * match ExtraWhitespace /\s\+$/
+autocmd! BufWinLeave * call clearmatches()
 
 "}}}
 
@@ -695,7 +727,7 @@ let g:UltiSnipsExpandTrigger="<NUL>"
 
 " coc nvim config {{{
 
-" coc nvim suggests these settings  
+" coc nvim suggests these settings
 
 " Some servers have issues with backup files, see #649
 set nowritebackup
@@ -724,6 +756,8 @@ augroup coc_vim_setup
 	autocmd!
 	autocmd filetype go,c,cpp,javascript,typescript call ApplyCocVimSetup()
 augroup END
+let g:coc_snippet_next='<c-l>'
+let g:coc_snippet_prev='<c-h>'
 
 function! s:show_documentation()
   " check to see if filetype is vim or help
@@ -744,10 +778,17 @@ function! ApplyCocVimSetup()
 	nnoremap <silent> <buffer> <leader>h :call <SID>show_documentation()<CR>
 	"nmap <silent> gy <Plug>(coc-type-definition)
 	"nmap <silent> gi <Plug>(coc-implementation)
-	
-	inoremap <expr> <cr> pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
-	inoremap <expr> <esc> pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
-	
+	nmap <silent> <buffer> ; <Plug>(coc-diagnostic-next-error)
+	nmap <silent> <buffer> ;; <Plug>(coc-diagnostic-next)
+
+	" Map jk to insert the command wait for a few milliseconds for coc to add
+	" the brackets if its a function (not sure how coc does this) and then esc
+	" to normal.
+	Arpeggio inoremap <buffer> <expr> jk pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
+	" Map enter to insert the top command and continue in insert.
+	"inoremap <buffer> <expr> <cr> pumvisible() ? "\<c-y>\<cmd>sleep 80m\<cr>\<esc>" : "\<c-g>u\<cr>"
+	"inoremap <buffer> <expr> <esc> pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
+
 	" So in order to compose the filetype and the CursorHold events we need to
 	" use an augroup in an augroup so that we can reliably clear previous
 	" autocmds. Without this augroup the cursor hold event is set every time
@@ -756,7 +797,7 @@ function! ApplyCocVimSetup()
 	augroup coc_vim_cursor_hold
 		autocmd!
 		" Highlight symbol under cursor on CursorHold
-		autocmd CursorHold <buffer> silent call CocActionAsync('highlight') 
+		autocmd CursorHold <buffer> silent call CocActionAsync('highlight')
 	augroup END
 
 endfunction
@@ -796,12 +837,6 @@ function! BuildGoFiles()
 		call go#cmd#Build(1)
 	endif
 endfunction
-
-augroup vimgo_maps
-	autocmd!
-	autocmd filetype go call ApplyVimGoMaps()
-augroup END
-
 
 " Go back to beginning of current identifier and insert/delete the star *
 function! ToggleStar()
@@ -864,6 +899,24 @@ function! PopulateGodoc()
 endfunction
 
 
+" Toggles the first letter of word to be capital or lowercase.
+function! ToggleCapital(word)
+	" Try to substitute lowercase for initial captial
+	let result = substitute(a:word, "^\\u.*", "\\l\\0", "")
+	if result != a:word 
+		return result
+	endif
+	" if no change ocurred then word must start with lowercase so return
+	" with initial capitalised.
+	return substitute(a:word, "^\\U.*", "\\u\\0", "")
+endfunction
+
+augroup vimgo_maps
+	autocmd!
+	autocmd filetype go call ApplyVimGoMaps()
+augroup END
+
+
 function! ApplyVimGoMaps()
 	" Automatic write on build
 	setlocal autowrite
@@ -875,6 +928,8 @@ function! ApplyVimGoMaps()
 	nnoremap <buffer> <leader>b :<C-u>call BuildGoFiles()<CR>
 
 	nnoremap <buffer> <leader>t :<C-u>GoTest<CR>
+
+	nnoremap <buffer> <leader>. :<C-u>GoDocBrowser<CR>
 
 	" Easy doc, rebinding this to quitall for now, i don't seem to use this
 	" binding much.
@@ -895,6 +950,10 @@ function! ApplyVimGoMaps()
 	nnoremap <buffer> 88 :<C-u>call ToggleStar()<CR>
 
 	nnoremap <buffer> <F6> :<C-u>call PopulateGodoc()<CR>
+
+	nnoremap <buffer> <c-b> :<C-u>GoDocBrowser<CR>
+	nnoremap <buffer> <expr> <leader>m ':call CocAction("rename", "' . ToggleCapital(expand("<cword>")) . '")<cr>'
+" nnoremap <expr> <tab> &ft == "help" ? ":set ft=<cr>" : ":set ft=help<cr>"
 
 endfunction "}}}
 
@@ -946,7 +1005,7 @@ au Syntax * RainbowParenthesesLoadBraces
 "fzf config {{{
 
 nnoremap <leader>o :<C-u>:Files<CR>
-nnoremap <leader>j :<C-u>:History:<CR>
+nnoremap <m-j> :<C-u>:History:<CR>
 nnoremap <leader>l :<C-u>:BLines<CR>
 
 " FZF with ripgrep FTW!!!

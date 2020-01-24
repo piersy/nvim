@@ -6,12 +6,25 @@
 	"languageserver": {
 		"golang": {
 			"command": "gopls",
-			"args": ["-logfile", "goplslog", "-rpc.trace", "-v", "-debug", "localhost:9999"],
 			"rootPatterns": ["go.mod"],
+			"trace.server": "verbose",
 			"filetypes": ["go"]
 		}
 	},
+//	"languageserver": {
+//		"ccls": {
+//			"command": "/home/piers/projects/ccls/Release/ccls",
+//			"filetypes": ["c", "cpp", "objc", "objcpp"],
+//			"rootPatterns": [".ccls", "compile_commands.json", ".vim/", ".git/", ".hg/"],
+//			"initializationOptions": {
+//				"cache": {
+//					"directory": "/tmp/ccls"
+//				}
+//			}
+//		}
+//	},
 	// This prevents the preview window displayed by the location list
 	// and allows me to use my normal approach of jumping through the quickfix.
-	"coc.preferences.useQuickfixForLocations": true
+	"coc.preferences.useQuickfixForLocations": true,
+	"diagnostic.checkCurrentLine" : true
 }
