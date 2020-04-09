@@ -421,6 +421,9 @@ tnoremap <C-k> <up>
 " Toggle spell
 nnoremap <leader>x  :<C-u>setlocal spell! <CR>
 
+" Map s to auto replace the word under cursor with the first spelling, <c-g>u inserts an undo-break so that the change can be undone with u. (not sure the undo break is needed
+nnoremap s 1z=
+
 " set quickfix and previewwindow to be unlisted so that bn and bp do not
 " navigate to it and so that when I exit these windows do not stop vim from
 " closing.
