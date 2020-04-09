@@ -68,7 +68,7 @@ Plug 'kien/rainbow_parentheses.vim'
 Plug 'moll/vim-bbye'
 
 " fzf plugin from the fzf repo at that location
-Plug '/home/piers/projects/fzf'
+Plug '~/.fzf'
 " the fzf vim plugin which depends on the fzf plugin
 Plug 'junegunn/fzf.vim'
 
