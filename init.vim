@@ -482,8 +482,10 @@ inoremap  <C-W>
 
 " help buffer key mappings {{{
 
-" Toggle help filetype
-nnoremap <expr> <tab> &ft == "help" ? ":set ft=<cr>" : ":set ft=help<cr>"
+" Toggle help filetype, unfortunately tab is also <c-i> and so interferes with
+" jumping forwards and back
+"nnoremap <expr> <tab> &ft == "help" ? ":set ft=<cr>" : ":set ft=help<cr>"
+
 " help mappings have to be set here otherwise they are overwritten with more
 " buffer specific maps
 augroup help_maps
