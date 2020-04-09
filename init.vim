@@ -640,7 +640,8 @@ nmap <Leader>F :execute(":S " . input('Regex-off: /'))<CR>
 " the current file name to be a file, for terminals it is not a file name so
 " we need to do something different, I'd suggest opening the explore at the
 " same dir that the terminal is in.
-nnoremap <leader>e :call MyExplore()<CR>
+"nnoremap <leader>e :call MyExplore()<CR> decided I don't want to use this any
+"more now that i can open files with fzf
 
 " if the file is not a terminal then use normal explore
 " otherwise explore the cwd.
