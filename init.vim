@@ -814,6 +814,10 @@ function! ApplyCocVimSetup()
 		autocmd CursorHold <buffer> silent call CocActionAsync('highlight')
 	augroup END
 
+	" Map ctrl+space to manually open completion, great for completing structs
+	" in golang.
+	inoremap <silent> <c-space> <C-R>=coc#start()<CR>
+
 endfunction
 "}}}
 
