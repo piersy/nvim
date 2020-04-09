@@ -3,7 +3,7 @@ call plug#begin()
 " Make sure you use single quotes.
 
 " The best color scheme.
-Plug 'tomasr/molokai'
+Plug 'piersy/molokai'
 
 " Map multiple simultaneous key presses.
 Plug 'piersy/vim-arpeggio'
