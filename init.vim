@@ -627,6 +627,9 @@ vnoremap " <esc>`>a"<esc>ma`<i"<esc>`al
 vnoremap ( <esc>`>a)<esc>ma`<i(<esc>`al
 vnoremap ) <esc>`>a)<esc>ma`<i(<esc>`al
 
+" Search for literal string
+command! -nargs=1 S let @/ = escape('<args>', '\')
+nmap <Leader>F :execute(":S " . input('Regex-off: /'))<CR>
 
 "}}}
 
