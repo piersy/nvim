@@ -78,7 +78,7 @@ Plug 'lambdalisue/suda.vim'
 Plug 'tpope/vim-commentary'
 
 " Syntax highliting for sane files
-Plug 'bloom42/sane-vim'
+Plug 'https://gitlab.com/bloom42/libs/sane-vim.git'
 
 " Syntax highliting for typescript
 Plug 'leafgarland/typescript-vim'
