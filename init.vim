@@ -39,9 +39,6 @@ Plug 'guns/xterm-color-table.vim'
 "Plug 'jiangmiao/auto-pairs'
 
 
-" Snippet support
-"Plug 'SirVer/ultisnips'
-
 " Language server
 "Plug 'autozimu/LanguageClient-neovim', {
 "			\ 'branch': 'next',
@@ -410,7 +407,7 @@ Arpeggio nnoremap jk <CR>
 Arpeggio tnoremap fj <CR>
 
 " Remove the original <CR> key functionality. But not in insert mode since I
-" want to use it for UltiSnips. And not in command mode, since it is useful
+" want to use it for completing files. And not in command mode, since it is useful
 " for entering commands after using the direction keys.
 nnoremap <CR> <NOP>
 vnoremap <CR> <NOP>
@@ -740,12 +737,6 @@ let g:airline_symbols.maxlinenr = ''
 " shown in the statusline at the bottom.
 let g:airline#extensions#tabline#fnamemod = ':t'
 
-"}}}
-
-" UtilSnip config {{{
-let g:UltiSnipsExpandTrigger="<NUL>"
-"let g:UltiSnipsJumpForwardTrigger="<CR>"
-"let g:UltiSnipsJumpBackwardTrigger="<C-H>"
 "}}}
 
 " coc nvim config {{{
