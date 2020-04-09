@@ -617,6 +617,17 @@ autocmd! InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 autocmd! InsertLeave * match ExtraWhitespace /\s\+$/
 autocmd! BufWinLeave * call clearmatches()
 
+" Set up easy (surround) in visual mode
+" `< and `> mark the beginning and end of the last selection. So we esc go to
+" the end insert the char go to the other end insert the other char and esc.
+" TODO mark the place where we insert the last char and finish there.
+vnoremap ` <esc>`>a`<esc>ma`<i`<esc>`al
+vnoremap ' <esc>`>a'<esc>ma`<i'<esc>`al
+vnoremap " <esc>`>a"<esc>ma`<i"<esc>`al
+vnoremap ( <esc>`>a)<esc>ma`<i(<esc>`al
+vnoremap ) <esc>`>a)<esc>ma`<i(<esc>`al
+
+
 "}}}
 
 " netrw buffer key mappings {{{
