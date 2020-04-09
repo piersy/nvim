@@ -980,6 +980,7 @@ function! SimplifyFmtAndSave()
 			" that vim provides a prompt and requires the user to press enter,
 			" which is not what I want, so for now, I will avoid printing a
 			" message here.
+			" UPDATE - its a neovim bug, I reported it here - https://github.com/neovim/neovim/issues/12099
 			"echo '!gofmt -s -w returned error code '.v:shell_error
 		endif
 		"undojoin
