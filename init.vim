@@ -294,7 +294,10 @@ function! ZoomToggle()
 endfunction
 
 " Command to save as sudo
-command! WRITE execute "w !sudo tee %"
+"command! WRITE execute "w !sudo tee %"
+" this is a new version using lambdalisue/suda.vim needed due to a neovim bug
+command! WRITE execute ":w suda://%"
+
 
 nnoremap <leader>s :<C-u>write<CR>
 nnoremap <leader>S :<C-u>WRITE<CR>
