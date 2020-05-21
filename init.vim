@@ -51,7 +51,7 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " golang plugins
 "
-Plug 'fatih/vim-go', {'tag': 'v1.18' }
+Plug 'fatih/vim-go', {'tag': 'v1.23' }
 
 " Nice parentheses
 Plug 'kien/rainbow_parentheses.vim'
