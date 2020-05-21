@@ -879,22 +879,20 @@ endfunction
 
 " vim-go config {{{
 
-" Dont do this on save, it causes an extra step to undo, when running
-" SimplifyFmtAndSave.
-let g:go_fmt_autosave = 0
+let g:go_fmt_autosave = 1
+let g:go_fmt_options = {
+  \ 'gofmt': '-s',
+  \ }
+
+
+" This and g:go_fmt_autosave dont work together see - https://github.com/fatih/vim-go/issues/2889
+" So instead i run goimports when i build
+" let g:go_imports_autosave=1
+"
+" Maybe we can do this in coc - see https://github.com/neoclide/coc.nvim/issues/888
 
 " Dont use the location list
 let g:go_list_type = "quickfix"
-
-"Use go imports on save, this should really be supported by gopls with
-"language client neovim but currently is not
-"let g:go_fmt_command = "goimports"
-" Because all of geth is not formatted with goimports its easier to not use it
-" on save, since it reorders the imports. gofmt doesn't fix or add missing
-" inports, so I need a shortcut for that now.
-" let g:go_fmt_command = "gofmt" "unfortunately I cant use gofmt -s for the
-" go_fmt_command, so instead i'll just override my mappying for save in a go
-" context.
 
 " Exclude protobuf generated files from metalinter.
 let g:go_metalinter_excludes = [".*\.pb\.go"]
@@ -995,63 +993,6 @@ function! ToggleCapital(word)
 endfunction
 
 
-" fmt -s and save. We use undojoin to be able to undo the operation as one
-" step. We also needed to add a little hack to prepend a dummy change to the
-" chain of events being undone with undochain so that when we undo our cursor
-" does not end up at the top of the file.
-function! SimplifyFmtAndSave()
-
-	"" Save current position
-	let l:v = winsaveview()
-
-	" this is only required if we actually filtered the lines because that
-	" moves cursor to the top, but instead we update the file in place
-	"" " https://vim.fandom.com/wiki/Restore_the_cursor_position_after_undoing_text_change_made_by_a_script
-	"" " create a fake change entry and merge with undo stack prior to do formating
-	"normal ix
-	"normal x
-	"try | silent undojoin | catch | endtry
-
-	"" in fact filtering is not a good approach because when there are errors in the
-	"" file the piped output from gofmt is just the errors.
- 	""%!gofmt -s
-
-	" silent! prevents any error being displayed in the case that the last
-	" operation was an undo.
-	silent! undojoin
-
-	"Instead we run gofmt and pass the file path to it and then run edit with
-	"the file to reload the buffer to show any changes and connect that with
-	"undojoin to make it a single undo step.
-		silent! !gofmt -s -w %:p
-		if !v:shell_error
-			silent! undojoin
-			silent! edit
-		else
-			" for some reason I cannot fathom this echo causes 2 lines to be
-			" output rather than one, a blank one and then the message, this
-			" happens only when an echo is executed directly after an external
-			" command, but why? The effect of outputting more than one line is
-			" that vim provides a prompt and requires the user to press enter,
-			" which is not what I want, so for now, I will avoid printing a
-			" message here.
-			" UPDATE - its a neovim bug, I reported it here - https://github.com/neovim/neovim/issues/12099
-			"echo '!gofmt -s -w returned error code '.v:shell_error
-		endif
-		"undojoin
-		"silent edit %:p
-		"if v:shell_error
-		"	echo "Failed to fmt file"
-		"endif
-	" undojoin
-	" write
-
-	call winrestview(l:v)
-
-	" Restor postion
-	" call setpos('.', save_pos)
-endfunction
-
 augroup vimgo_maps
 	autocmd!
 	autocmd filetype go call ApplyVimGoMaps()
@@ -1065,14 +1006,14 @@ function! ApplyVimGoMaps()
 	" set the text width for comment formatting
 	"set textwidth=90
 
-	" Build both test and non test files with one command
-	nnoremap <buffer> <leader>b :<C-u>call BuildGoFiles()<CR>
+	" Build both test and non test files with one command, most vim go
+	" commands are not chainable with the bar but all plug mappings are
+	" chainable
+	nmap <buffer> <leader>b <Plug>(go-imports) \| :call BuildGoFiles()<CR>
 
 	nnoremap <buffer> <leader>t :<C-u>GoTest<CR>
 
 	nnoremap <buffer> <leader>. :<C-u>GoImports<CR>
-	nnoremap <silent> <buffer> <leader>s :call SimplifyFmtAndSave()<CR>
-	"nnoremap <silent> <buffer> <leader>s :silent !gofmt -s -w %:p<CR>
 
 	" Easy doc, rebinding this to quitall for now, i don't seem to use this
 	" binding much.
@@ -1083,8 +1024,8 @@ function! ApplyVimGoMaps()
 	" to get the doc.
 	nnoremap <buffer> K <C-U>
 
-	Arpeggio inoremap <buffer> kl <ESC>:<C-u>call BuildGoFiles()<CR>
-	Arpeggio nnoremap <buffer> kl :<C-u>call BuildGoFiles()<CR>
+	Arpeggio inoremap <buffer> kl <ESC><Plug>(go-imports) \| :<C-u>call BuildGoFiles()<CR>
+	Arpeggio nnoremap <buffer> kl <Plug>(go-imports) \| :<C-u>call BuildGoFiles()<CR>
 
 	" Fuzzy find through the declarations in file
 	nnoremap <buffer> <leader>g :<C-u>GoDecls<CR>
