@@ -666,7 +666,11 @@ vnoremap ) <esc>`>a)<esc>ma`<i(<esc>`al
 
 " Search for literal string
 command! -nargs=1 S let @/ = escape('<args>', '\')
-nmap <Leader>F :execute(":S " . input('Regex-off: /'))<CR>
+nnoremap <Leader>F :execute(":S " . input('Regex-off: /'))<CR>
+
+" Map Y (which amazingly isn't mapped to anything by default) to yank the
+" current filename + linenumber + line(on a newline)
+nnoremap Y :let @+ = expand("%").":".line(".")."\n".getline(".")<CR>
 
 "}}}
 
