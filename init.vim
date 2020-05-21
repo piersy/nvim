@@ -319,6 +319,34 @@ command! BufOnly silent! execute "%bd|e#|bd#"
 
 nnoremap <leader>a :<c-u>BufOnly<cr>
 
+
+" Map jump back to jump back and unlist - doesn't work, unlists everything in
+" the end
+"nnoremap <c-o> <c-o> \| :setlocal nobuflisted<cr>
+"
+"Another try I add a varibale to buffers that lets me know if they are listed
+"or not.
+function! s:PersistNobl()
+  if exists('b:persist_nobl')
+    setlocal nobuflisted
+  elseif !&buflisted
+    let b:persist_nobl = 1
+  endif
+endfunction
+
+augroup persist_nobuflisted
+  autocmd!
+  autocmd OptionSet buflisted call <SID>PersistNobl()
+  autocmd BufEnter * call <SID>PersistNobl()
+augroup END
+
+function! s:SetListed()
+	unlet b:persist_nobl
+    setlocal buflisted
+endfunction
+
+nnoremap <leader>n :call <SID>SetListed()<cr>
+
 " Deletes the current buffer or quits if this is the last buffer.
 function! CloseBufferOrQuit()
 
