@@ -96,9 +96,21 @@ Plug 'piersy/potion-vim'
 Plug 'piersy/vim-rebase-view'
 
 Plug 'tpope/vim-eunuch'
+
+
+" Support for rst editing
+Plug 'gu-fan/riv.vim'
+" Support for rst preview
+"Plug 'gu-fan/InstantRst'
+
 " Add plugins to &runtimepath.
 call plug#end()
 "}}}
+
+" riv-vim{{{
+let g:rst_fold_enabled=1
+" }}}
+
 
 " abbreviations {{{
 iabbrev netowrk network
@@ -1177,6 +1189,9 @@ endfunction
 let g:argwrap_tail_comma = 1
 " }}}
 
+" InstantRst config {{{
+let g:instant_rst_browser = 'google-chrome'
+" }}}
 endif
 
 inoremap <c-j> <C-n>
