@@ -810,9 +810,10 @@ set signcolumn=yes
 "			\ 'c': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
 "			\ 'go': ['gopls'],
 "			\ }
+
 augroup coc_vim_setup
 	autocmd!
-	autocmd filetype go,c,cpp,javascript,typescript call ApplyCocVimSetup()
+	autocmd filetype go,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
 augroup END
 let g:coc_snippet_next='<c-l>'
 let g:coc_snippet_prev='<c-h>'
