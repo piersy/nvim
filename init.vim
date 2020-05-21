@@ -827,8 +827,18 @@ function! s:show_documentation()
   endif
 endfunction
 
+" This jumps to a location unlists the buffer this will hopefully help reduce
+" a buildup of buffers when hopping through files.
+" Doesn't work though becuase coming back with ctrl+o lists the buffers
+function! s:coc_preview()
+	call CocAction('jumpDefinition')
+	call <SID>PersistNobl()
+endfunction
+
 function! ApplyCocVimSetup()
-	nmap <silent> <buffer> <leader>d <Plug>(coc-definition)
+	"nmap <silent> <buffer> <leader>d <Plug>(coc-definition)
+	"nmap <silent> <buffer> <leader>d :<C-u>call CocAction('jumpDefinition')<CR>
+	nnoremap <silent> <buffer> <leader>d :<C-u>call <SID>coc_preview()<CR>
 	"nnoremap <silent> <buffer> <leader>h :<C-u>call LanguageClient#textDocument_hover()<CR>
 	nmap <silent> <buffer> <leader>u <Plug>(coc-references)
 	"nnoremap <silent> <buffer> <leader>g :<C-u>call LanguageClient#textDocument_documentSymbol()<CR>
