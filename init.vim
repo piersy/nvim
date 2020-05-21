@@ -1015,6 +1015,8 @@ function! ApplyVimGoMaps()
 
 	nnoremap <buffer> <leader>. :<C-u>GoImports<CR>
 
+	nnoremap <buffer> <leader>y :<c-u>GoImplements<CR>
+
 	" Easy doc, rebinding this to quitall for now, i don't seem to use this
 	" binding much.
 	"nnoremap <buffer> <leader>q :<C-u>GoDoc<CR>
