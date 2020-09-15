@@ -1196,3 +1196,10 @@ let g:instant_rst_browser = 'google-chrome'
 endif
 
 inoremap <c-j> <C-n>
+" vim commentary config {{{
+" Not sure why but vim registers <c-/> as <c-_> so this is mapping ctrl+/ to
+" toggle comments.
+	nmap <c-_> <Plug>CommentaryLine
+	vmap <c-_> <Plug>Commentary
+" }}}
+
