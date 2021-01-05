@@ -23,40 +23,20 @@ Plug 'tomlion/vim-solidity'
 " Surround text objects with more text
 Plug 'tpope/vim-surround'
 
-" Autocomplete
-"Plug 'Shougo/deoplete.nvim', { 'tag': '5.0', 'do': ':UpdateRemotePlugins' }
-"Plug 'nixprime/cpsm', { 'do': 'bash install.sh' }
-
 Plug 'guns/xterm-color-table.vim'
-
-"Plug 'Shougo/neosnippet.vim'
-"Plug 'Shougo/neosnippet-snippets'
-
-" Add automatic parentheses to completion (only works with deoplete)
-"Plug 'Shougo/neopairs.vim'
-
-" Add automatic parentheses closing
-"Plug 'jiangmiao/auto-pairs'
-
-
-" Language server
-"Plug 'autozimu/LanguageClient-neovim', {
-"			\ 'branch': 'next',
-"			\ 'do': 'bash install.sh',
-"			\ }
 
 " Conquerer of code, ide like plugin with diagnostics and autocomplete with
 " lang server support.
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+"Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'} "{'branch': 'release'} {'tag': 'v0.0.78'}
+"Plug 'piersy/coc.nvim', { 'dir': '~/projects/coc.nvim', 'do': 'yarn install --frozen-lockfile' }
+"Plug 'neoclide/coc.nvim', {'tag': 'v1.23' } "{'branch': 'release'} {'tag': 'v0.0.78'}
+Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'} "{'tag': 'v0.0.78'}
 
-" golang plugins
-"
-Plug 'fatih/vim-go', {'tag': 'v1.23' }
+" I took the snippets from vim-go and put them in their own repo
+Plug 'piersy/vim-snippets-go', {'branch': 'main'}
 
 " Nice parentheses
 Plug 'kien/rainbow_parentheses.vim'
-
-"Plug 'Shougo/denite.nvim', { 'tag': 'support-python-3.4' }
 
 " Vim overlooks the need to close a buffer without closing a window, this
 " plugin provides that functionality. I want this specifically so that if I
@@ -72,6 +52,7 @@ Plug 'junegunn/fzf.vim'
 " fixes the ':w !sudo tee %' problem in neovim with ':w suda://%'
 Plug 'lambdalisue/suda.vim'
 
+" Easily comment/uncomment blocks in code
 Plug 'tpope/vim-commentary'
 
 " Syntax highliting for sane files
@@ -92,18 +73,18 @@ Plug 'AndrewRadev/linediff.vim'
 " Wrap arguments on functions with :ArgWrap
 Plug 'FooSoft/vim-argwrap'
 
-Plug 'piersy/potion-vim'
 Plug 'piersy/vim-rebase-view'
 
 Plug 'tpope/vim-eunuch'
-
 
 " Support for rst editing
 Plug 'gu-fan/riv.vim'
 " Support for rst preview
 "Plug 'gu-fan/InstantRst'
 
-" Add plugins to &runtimepath.
+Plug 'jiangmiao/auto-pairs'
+
+"" Add plugins to &runtimepath.
 call plug#end()
 "}}}
 
@@ -111,21 +92,20 @@ call plug#end()
 let g:rst_fold_enabled=1
 " }}}
 
-
 " abbreviations {{{
 iabbrev netowrk network
 "}}}
 
-if isdirectory($HOME . "/.config/nvim/plugged")
-"let g:python3_host_prog="/usr/local/bin/python3.5"
-"let g:python3_host_prog = "/usr/local/bin/python3.5"
 " Arpeggio needs to be loaded as the init.vim is parsed so that
 " it can be used for defining key mappings.
 call arpeggio#load()
 
 
 " Sets the molokai colorscheme without this line you get normal colors.
-colorscheme molokai
+" colorscheme molokai
+" if has("termguicolors")
+" 	set termguicolors
+" endif
 
 " Work around for broken xfce4-terminal stops garbage characters being printed
 " in neovim 0.2.2+
@@ -223,9 +203,6 @@ set undofile
 
 "}}}
 
-" Auto open quickfix window after running grep
-autocmd! QuickFixCmdPost *grep* cwindow
-
 " Position quickfix window at bottom of screen and take whole width. qf is the
 " quickfix filetype
 au FileType qf wincmd J
@@ -280,7 +257,7 @@ let mapleader = "\<Space>"
 nnoremap <Space> <NOP>
 
 " Allow easy editing of init.vim file.
-nnoremap <leader>ve :e $MYVIMRC<CR>
+nnoremap <F8> :e $MYVIMRC<CR>
 " source the vimrc on save, we also need to call AirlineRefresh otherwise the
 " airline display borks
 autocmd! BufWritePost $MYVIMRC source $MYVIMRC | AirlineRefresh
@@ -390,8 +367,8 @@ nnoremap <leader><ESC> :<C-u>quitall!<CR>
 
 nnoremap <leader>w :<C-u>vsplit<CR>
 nnoremap <leader>k :<C-u>close<CR>
-nnoremap <leader>i gqk
-vnoremap <leader>i gq
+nnoremap <leader>j gqk
+vnoremap <leader>j gq
 
 
 
@@ -437,10 +414,10 @@ Arpeggio nnoremap po :<C-u>!echo -ne '\007'<CR><CR>
 " entries from autocomplete. This gets annoying if you have your min pattern
 " length set to one and you want to just insert a newline.
 "Arpeggio inoremap <expr>jk pumvisible() ? "\<C-n>" : "<CR>"
+Arpeggio map jk <CR>
+Arpeggio imap jk <CR>
+Arpeggio cmap jk <CR>
 
-Arpeggio inoremap jk <CR>
-Arpeggio cnoremap jk <CR>
-Arpeggio nnoremap jk <CR>
 "
 " As with esc we have to map fj instead of jk so that when using vim inside a
 " terminal in vim we do not trigger the <CR>  of the terminal.
@@ -449,8 +426,8 @@ Arpeggio tnoremap fj <CR>
 " Remove the original <CR> key functionality. But not in insert mode since I
 " want to use it for completing files. And not in command mode, since it is useful
 " for entering commands after using the direction keys.
-nnoremap <CR> <NOP>
-vnoremap <CR> <NOP>
+" nnoremap <CR> <NOP>
+" vnoremap <CR> <NOP>
 
 tnoremap <C-j> <down>
 tnoremap <C-k> <up>
@@ -478,29 +455,51 @@ augroup END
 nnoremap <C-u> :<C-u>bp<CR>
 nnoremap <C-p> :<C-u>bn<CR>
 
-function! QFixToggle()
-	let qf = filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") == "qf"')
-	if len(qf) > 0
-		cclose
-	else
-		let curr_win = winnr()
-		copen
-		:execute curr_win . "wincmd w"
-	endif
-endfunction
+" {{{ Moving over to location list with coc nvim
+" function! QFixToggle()
+" 	let qf = filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") == "qf"')
+" 	if len(qf) > 0
+" 		cclose
+" 	else
+" 		let curr_win = winnr()
+" 		copen
+" 		:execute curr_win . "wincmd w"
+" 	endif
+" endfunction
 
-" Easy quickfix closing
-nnoremap <leader><Space> :<C-u>call QFixToggle()<CR>
+" " Easy quickfix closing
+" nnoremap <leader><Space> :<C-u>call QFixToggle()<CR>
 
-" This sets up commands to loop through the quickfix list. Normal
-" behaviour will only acknowledge cnext or cprev if there is more than one
-" quickfix entry.
-command! Cnext try | cnext | catch | cfirst | catch | endtry
-command! Cprev try | cprev | catch | clast | catch | endtry
+" " This sets up commands to loop through the quickfix list. Normal
+" " behaviour will only acknowledge cnext or cprev if there is more than one
+" " quickfix entry.
+" command! Cnext try | cnext | catch | cfirst | catch | endtry
+" command! Cprev try | cprev | catch | clast | catch | endtry
 
-" Cycle through entries in the quickfix
-nnoremap <C-l> :<C-u>Cnext<CR>
-nnoremap <C-h> :<C-u>Cprev<CR>
+" " Cycle through entries in the quickfix
+" nnoremap <C-l> :<C-u>Cnext<CR>
+" nnoremap <C-h> :<C-u>Cprev<CR>
+" }}}
+
+" {{{ LocationList config
+"function! s:LocationListToggle() abort
+"" Try and close the location list and then if the buffer count didn't
+"	" change we know it was not open so we open it.
+"	"
+"    let buffer_count_before = s:BufferCount()
+"    lclose
+
+"    if s:BufferCount() == buffer_count_before
+"        lopen
+"    endif
+"endfunction
+
+"function! s:BufferCount() abort
+"    return len(filter(range(1, bufnr('$')), 'bufwinnr(v:val) != -1'))
+"endfunction
+
+"nmap <silent> <leader><space> :call <SID>LocationListToggle()<cr>
+" }}}
 
 " Remap b for split keyboard
 nnoremap m b
@@ -641,18 +640,18 @@ function! StripTrailingWhitespaces()
 	call cursor(l, c)
 endfun
 
-" Highlight trainling spaces red, its important that this matches '*' since it
-" is applied to window's rather than buffers, so we need to ensure that any
-" open window gets the same treatment. If I wanted to apply this to certain
-" buffers only then I would need to change the events to work on buffers.
-highlight ExtraWhitespace ctermbg=red guibg=red
-autocmd! BufWinEnter * match ExtraWhitespace /\s\+$/
-" This line stops matching trainling whitespace on the line with the cursor.
-" '\%#' matches the cursor and '\@<!' requires the prior token to not match in
-" order for the pattern to match.
-autocmd! InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
-autocmd! InsertLeave * match ExtraWhitespace /\s\+$/
-autocmd! BufWinLeave * call clearmatches()
+"" Highlight trainling spaces red, its important that this matches '*' since it
+"" is applied to window's rather than buffers, so we need to ensure that any
+"" open window gets the same treatment. If I wanted to apply this to certain
+"" buffers only then I would need to change the events to work on buffers.
+"highlight ExtraWhitespace ctermbg=red guibg=red
+"autocmd! BufWinEnter * match ExtraWhitespace /\s\+$/
+"" This line stops matching trainling whitespace on the line with the cursor.
+"" '\%#' matches the cursor and '\@<!' requires the prior token to not match in
+"" order for the pattern to match.
+"autocmd! InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+"autocmd! InsertLeave * match ExtraWhitespace /\s\+$/
+"autocmd! BufWinLeave * call clearmatches()
 
 " Set up easy (surround) in visual mode
 " `< and `> mark the beginning and end of the last selection. So we esc go to
@@ -663,6 +662,8 @@ vnoremap ' <esc>`>a'<esc>ma`<i'<esc>`al
 vnoremap " <esc>`>a"<esc>ma`<i"<esc>`al
 vnoremap ( <esc>`>a)<esc>ma`<i(<esc>`al
 vnoremap ) <esc>`>a)<esc>ma`<i(<esc>`al
+vnoremap ] <esc>`>a]<esc>ma`<i[<esc>`al
+vnoremap [ <esc>`>a]<esc>ma`<i[<esc>`al
 
 " Search for literal string
 command! -nargs=1 S let @/ = escape('<args>', '\')
@@ -718,9 +719,20 @@ function! ConfigureYaml()
 	" Set tabs to be represented by 2 spaces;
 	setlocal tabstop=2
 
-	" The shiftwidth controls the indent usded for autoindenting
-	" setting it to 0 makes it follow the tabstop setting.
-	setlocal shiftwidth=0
+	" Ensures that tabs are expanded to spaces when inserted
+	setlocal expandtab
+endfunction
+"}}}
+
+" solidity file type config {{{
+augroup solidity_config
+	autocmd!
+	autocmd filetype solidity call ConfigureYaml()
+augroup END
+
+function! ConfigureSolidity()
+	" Set tabs to be represented by 2 spaces;
+	setlocal tabstop=4
 
 	" Ensures that tabs are expanded to spaces when inserted
 	setlocal expandtab
@@ -802,58 +814,109 @@ set shortmess+=c
 " always show signcolumns
 set signcolumn=yes
 
-" Remap keys for gotos
-"let g:LanguageClient_serverCommands = {
-"			\ 'javascript': ['node', '/home/piers/projects/javascript-typescript-langserver/lib/language-server-stdio', '-l', '/dev/null'],
-"			\ 'typescript': ['node', '/home/piers/projects/javascript-typescript-langserver/lib/language-server-stdio', '-t', '-l', '/dev/null'],
-"			\ 'cpp': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
-"			\ 'c': ['/home/piers/projects/cquery/build/cquery', '--log-file=/tmp/cq.log', '--init={"cacheDirectory":"/home/piers/.config/nvim/cquery_cache"}'],
-"			\ 'go': ['gopls'],
-"			\ }
+let g:coc_snippet_next='<tab>'
+let g:coc_snippet_prev='<s-tab>'
+
+let g:coc_enable_locationlist = 0
+
+" Toggles the first letter of word to be capital or lowercase.
+function! ToggleCapital(word)
+	" Try to substitute lowercase for initial captial
+	let result = substitute(a:word, "^\\u.*", "\\l\\0", "")
+	if result != a:word 
+		return result
+	endif
+	" if no change ocurred then word must start with lowercase so return
+	" with initial capitalised.
+	return substitute(a:word, "^\\U.*", "\\u\\0", "")
+endfunction
+
+function! s:CocListToggle()
+	" Count existing list buffers
+	let lists = len(filter(range(1, bufnr('$')), 'stridx(bufname(v:val), "list://") ==# 0'))
+	if lists > 0
+		:CocListCancel
+	else
+		:CocList diagnostics
+	endif
+endfunction
 
 augroup coc_vim_setup
 	autocmd!
-	autocmd filetype go,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
+	" Setup languages for which coc vim is enabled, also some require language
+	" server support in in coc-settings.json (:CocConfig).
+	autocmd filetype vim,go,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
+	" autocmd filetype vim,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
+	" Organize imports on save
+	autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+	" format on save
+	" autocmd BufWritePre *.go,*.py,*.js,*.ts,*.c,*.cpp,*.h,*.hpp :call CocAction('format')
+	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp :call CocAction('format')
+	" Update signature help on jump placeholder, this makes the function
+	" param help be displayed as you jump between function params when
+	" completing.
+	autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+	autocmd User CocLocationsChange CocList --no-quit --normal location
 augroup END
-let g:coc_snippet_next='<c-l>'
-let g:coc_snippet_prev='<c-h>'
 
-function! s:show_documentation()
-  " check to see if filetype is vim or help
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
-
-" This jumps to a location unlists the buffer this will hopefully help reduce
-" a buildup of buffers when hopping through files.
-" Doesn't work though becuase coming back with ctrl+o lists the buffers
-function! s:coc_preview()
-	call CocAction('jumpDefinition')
-	call <SID>PersistNobl()
-endfunction
 
 function! ApplyCocVimSetup()
-	"nmap <silent> <buffer> <leader>d <Plug>(coc-definition)
-	"nmap <silent> <buffer> <leader>d :<C-u>call CocAction('jumpDefinition')<CR>
-	nnoremap <silent> <buffer> <leader>d :<C-u>call <SID>coc_preview()<CR>
-	"nnoremap <silent> <buffer> <leader>h :<C-u>call LanguageClient#textDocument_hover()<CR>
+	nmap <silent> <buffer> <leader>d <Plug>(coc-definition)
+	nmap <silent> <buffer> <leader>t <Plug>(coc-type-definition)
+	nmap <silent> <buffer> <leader>i <Plug>(coc-implementation)
+	" u for usages, we save r for rename
 	nmap <silent> <buffer> <leader>u <Plug>(coc-references)
-	"nnoremap <silent> <buffer> <leader>g :<C-u>call LanguageClient#textDocument_documentSymbol()<CR>
 	nmap <silent> <buffer> <leader>r <Plug>(coc-rename)
-	" Use K to show documentation in preview window
-	nnoremap <silent> <buffer> <leader>h :call <SID>show_documentation()<CR>
-	"nmap <silent> gy <Plug>(coc-type-definition)
-	"nmap <silent> gi <Plug>(coc-implementation)
-	nmap <silent> <buffer> ; <Plug>(coc-diagnostic-next-error)
-	nmap <silent> <buffer> ;; <Plug>(coc-diagnostic-next)
+	" Toggle from public to private
+	nnoremap <buffer> <expr> <leader>m ':call CocAction("rename", "' . ToggleCapital(expand("<cword>")) . '")<cr>'
+	" This searches for a string and finds all occurrences and lets us edit
+	" them with multiple cursors, can be useful for simple refactors, the
+	" trailing space is intended.
+	nnoremap <silent> <buffer> <leader>R :CocSearch 
+
+	"Opens the renameable element under the cursor in a separate window with
+	"multiple cursors so that it can be renamed whilst watching all the
+	"changes. Its not really a refactor though better to use :CocSearch which
+	"does the same but for a specific search string so I can find all
+	"instantiations of a struct for instance!
+	"nmap <silent> <buffer> <leader>u <Plug>(coc-refactor)
+
+	" This will override the LocationListToggle mapping inside coc vim
+	" buffers but CocDiagnostics opens the location list so has the same
+	" behaviour, once the list is open we are not in a coc vim buffer so
+	" LocationListToggle takes over to let us close the location list.
+	nnoremap <silent> <buffer> <leader><space> :call <SID>CocListToggle()<cr>
+	nnoremap <silent> <buffer> <leader>g :CocList outline<cr>
+
+
+	nnoremap <silent> <buffer> <c-l> :<c-u>CocNext<cr>
+	nnoremap <silent> <buffer> <c-h> :<c-u>CocPrev<cr>
+
+	nmap <silent> <buffer> <m-.> <Plug>(coc-diagnostic-next-error)
+	nmap <silent> <buffer> <m-,> <Plug>(coc-diagnostic-prev-error)
+	nmap <silent> <buffer> <c-]> <Plug>(coc-diagnostic-next)
+	nmap <silent> <buffer> <c-[> <Plug>(coc-diagnostic-next)
+	nmap <silent> <buffer> <leader>f <Plug>(coc-fix-current)
+
+
+	" this is not working for golang
+	"nmap <silent> <buffer> <leader>t <Plug>(coc-range-select)
+
+	" Select in function
+	xmap if <Plug>(coc-funcobj-i)
+	omap if <Plug>(coc-funcobj-i)
+
+	" Select around function
+	xmap af <Plug>(coc-funcobj-a)
+	omap af <Plug>(coc-funcobj-a)
+
+
+	nnoremap <silent> <buffer> <leader>h :call CocAction('doHover')<CR>
 
 	" Map jk to insert the command wait for a few milliseconds for coc to add
 	" the brackets if its a function (not sure how coc does this) and then esc
 	" to normal.
-	Arpeggio inoremap <buffer> <expr> jk pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
+	Arpeggio imap <buffer> <expr> jk pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
 	" Map enter to insert the top command and continue in insert.
 	"inoremap <buffer> <expr> <cr> pumvisible() ? "\<c-y>\<cmd>sleep 80m\<cr>\<esc>" : "\<c-g>u\<cr>"
 	"inoremap <buffer> <expr> <esc> pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
@@ -874,174 +937,8 @@ function! ApplyCocVimSetup()
 	inoremap <silent> <c-space> <C-R>=coc#start()<CR>
 
 endfunction
-"}}}
 
-
-" vim-go config {{{
-
-let g:go_fmt_autosave = 1
-let g:go_fmt_options = {
-  \ 'gofmt': '-s',
-  \ }
-
-
-" This and g:go_fmt_autosave dont work together see - https://github.com/fatih/vim-go/issues/2889
-" So instead i run goimports when i build
-" let g:go_imports_autosave=1
-"
-" Maybe we can do this in coc - see https://github.com/neoclide/coc.nvim/issues/888
-
-" Dont use the location list
-let g:go_list_type = "quickfix"
-
-" Exclude protobuf generated files from metalinter.
-let g:go_metalinter_excludes = [".*\.pb\.go"]
-let g:go_metalinter_command = "golangci-lint run"
-
-" Use local godoc server
-let g:go_doc_url = 'http://localhost:6060'
-
-" Increase timeout
-let g:go_test_timeout = '20s'
-
-" run :GoBuild or :GoTestCompile based on the go file
-function! BuildGoFiles()
-	let l:file = expand('%')
-	if l:file =~# '^\f\+_test\.go$'
-		" The first parameter controls whether we jump to the first error or
-		" not, 0 jumps. The second controls whether we run or just compile, 1
-		" compiles.
-		call go#test#Test(1, 1)
-	elseif l:file =~# '^\f\+\.go$'
-		" The first parameter controls whether we jump to the first error or
-		" not, 0 jumps.
-		call go#cmd#Build(1)
-	endif
-endfunction
-
-" Go back to beginning of current identifier and insert/delete the star *
-function! ToggleStar()
-	" Check to where we are
-	let prev_char = getline(".")[col(".")-2]
-
-	" we are at the beginning of a line
-	if prev_char == ''
-		normal! i*
-		normal! l
-		return
-	endif
-
-	" Save current position
-	let save_pos = getpos(".")
-
-	" we are at the beginning of a word
-	if  prev_char == '*' || prev_char =~ '\s' 
-		" Just move to prev char
-		normal! h
-	else
-		" Move to just before beginning of word including dots as word chars
-		set iskeyword+=.
-		normal! bh
-		set iskeyword-=.
-	endif
-
-	" Check if we have a star and if so delete
-	if getline(".")[col(".")-1] == '*'
-		normal! x
-		" Modify save_pos to account for the removed char
-		let save_pos[2] = save_pos[2]-1
-	else
-		normal! a*
-		" Modify save_pos to account for the added char
-		let save_pos[2] = save_pos[2]+1
-	endif
-
-	" Restor postion
-	call setpos('.', save_pos)
-endfunction
-
-
-" Executed on a line with a function will propulate godoc for the line above
-" leaveing you in insert mode.
-function! PopulateGodoc()
-	" go to beginning of line then go foward a word
-	normal! ^w
-	" if the current char is a bracket then goto the next bracket and then to
-	" the next word
-	if getline(".")[col(".")-1] == '('
-		normal! %w
-	endif
-	" we need to use execute here so that we can use ^[ as escape to be able
-	" to print. Yank the to the end of the word open a line above add the
-	" comment followed by a space, print the word and append 2 spaces.
-	execute ":normal! yeO// pa  "
-	" leve the caller in insert mode
-	startinsert
-endfunction
-
-
-" Toggles the first letter of word to be capital or lowercase.
-function! ToggleCapital(word)
-	" Try to substitute lowercase for initial captial
-	let result = substitute(a:word, "^\\u.*", "\\l\\0", "")
-	if result != a:word 
-		return result
-	endif
-	" if no change ocurred then word must start with lowercase so return
-	" with initial capitalised.
-	return substitute(a:word, "^\\U.*", "\\u\\0", "")
-endfunction
-
-
-augroup vimgo_maps
-	autocmd!
-	autocmd filetype go call ApplyVimGoMaps()
-augroup END
-
-
-function! ApplyVimGoMaps()
-	" Automatic write on build
-	setlocal autowrite
-
-	" set the text width for comment formatting
-	"set textwidth=90
-
-	" Build both test and non test files with one command, most vim go
-	" commands are not chainable with the bar but all plug mappings are
-	" chainable
-	nmap <buffer> <leader>b <Plug>(go-imports) \| :call BuildGoFiles()<CR>
-
-	nnoremap <buffer> <leader>t :<C-u>GoTest<CR>
-
-	nnoremap <buffer> <leader>. :<C-u>GoImports<CR>
-
-	nnoremap <buffer> <leader>y :<c-u>GoImplements<CR>
-
-	" Easy doc, rebinding this to quitall for now, i don't seem to use this
-	" binding much.
-	"nnoremap <buffer> <leader>q :<C-u>GoDoc<CR>
-
-
-	" Map K again in buffer specific mode since it is mapped by go
-	" to get the doc.
-	nnoremap <buffer> K <C-U>
-
-	Arpeggio inoremap <buffer> kl <ESC><Plug>(go-imports) \| :<C-u>call BuildGoFiles()<CR>
-	Arpeggio nnoremap <buffer> kl <Plug>(go-imports) \| :<C-u>call BuildGoFiles()<CR>
-
-	" Fuzzy find through the declarations in file
-	nnoremap <buffer> <leader>g :<C-u>GoDecls<CR>
-	nnoremap <buffer> <leader>p :<C-u>ArgWrap<CR>
-
-	nnoremap <buffer> 88 :<C-u>call ToggleStar()<CR>
-
-	nnoremap <buffer> <F6> :<C-u>call PopulateGodoc()<CR>
-
-	nnoremap <buffer> <c-b> :<C-u>GoDocBrowser<CR>
-	nnoremap <buffer> <expr> <leader>m ':call CocAction("rename", "' . ToggleCapital(expand("<cword>")) . '")<cr>'
-" nnoremap <expr> <tab> &ft == "help" ? ":set ft=<cr>" : ":set ft=help<cr>"
-
-endfunction "}}}
+""}}}
 
 "rainbow parenthesis config {{{
 let g:rbpt_max = 16
@@ -1090,10 +987,24 @@ au Syntax * RainbowParenthesesLoadBraces
 
 "fzf config {{{
 
-nnoremap <leader>o :<C-u>:Files<CR>
+" consider moving all fzf mappings to use alt (m) so that they are easier to
+" remember
+nnoremap <m-o> :<C-u>:MyFiles<CR>
 nnoremap <m-j> :<C-u>:History:<CR>
-nnoremap <leader>l :<C-u>:BLines<CR>
+nnoremap <m-l> :<C-u>:Lines<CR>
+nnoremap <m-b> :<c-u>Buffers<cr>
+nnoremap <m-i> :<C-u>:Find<CR>
 
+" This command behaves the same as the one I use on the commandline for
+" opening files.
+command! -nargs=? MyFiles call fzf#run(fzf#wrap({
+			\ 'source': 'fd --hidden --type f',
+			\ 'options': '--multi --extended --no-sort',
+			\ 'down':    '40%',
+			\ 'dir': <q-args>}))
+
+
+"
 " FZF with ripgrep FTW!!!
 " --column: Show column number
 " --line-number: Show line number
@@ -1106,6 +1017,7 @@ nnoremap <leader>l :<C-u>:BLines<CR>
 " --glob: Additional conditions for search (in this case ignore everything in the .git/ folder)
 " --color: Search color options
 "command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1, <bang>0)
+"
 
 command! -bang -nargs=* Find
 			\ call fzf#vim#grep(
@@ -1115,7 +1027,6 @@ command! -bang -nargs=* Find
 			\   <bang>0)
 set grepprg=rg\ --vimgrep
 
-nnoremap <leader>f :<C-u>:Find<CR>
 
 
 " Similarly, we can apply it to fzf#vim#grep. To use ripgrep instead of ag:
@@ -1134,13 +1045,22 @@ command! Buffers call fzf#run({
 \ 'down':    '40%' })
 
 function! s:all_files()
-  return extend(
-  \ filter(copy(v:oldfiles),
-  \        "v:val !~ 'fugitive:\\|NERD_tree\\|^/tmp/\\|.git/'"),
-  \ map(filter(range(1, bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)'))
+  return map(filter(range(1, bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)')
 endfunction
 
-nnoremap <leader>e :<c-u>Buffers<cr>
+
+" Command to get prs with field and title and then insert the pr
+command! Prs call fzf#run(fzf#wrap({
+			\ 'source': 'ghapi prs --repo clearmatics/autonity --fields "title:%v ,url:[%v]"',
+			\ 'sink':    function('s:insert_line'), 
+			\ 'options': '--multi --extended --no-sort',
+			\ 'down':    '40%'}))
+
+function! s:insert_line(item)
+    let @z=a:item
+    norm "zp
+endfunction
+
 
 "}}}
 
@@ -1188,14 +1108,13 @@ endfunction
 " If I need more flexibility i can define b:argwrap_tail_comma in a buffer
 " local ft auto cmd
 let g:argwrap_tail_comma = 1
+nnoremap <leader>p :<C-u>ArgWrap<CR>
 " }}}
 
 " InstantRst config {{{
 let g:instant_rst_browser = 'google-chrome'
 " }}}
-endif
 
-inoremap <c-j> <C-n>
 " vim commentary config {{{
 " Not sure why but vim registers <c-/> as <c-_> so this is mapping ctrl+/ to
 " toggle comments.
@@ -1203,3 +1122,18 @@ inoremap <c-j> <C-n>
 	vmap <c-_> <Plug>Commentary
 " }}}
 
+" Github graphql functions {{{
+
+" Toggles the first letter of word to be capital or lowercase.
+function! GetPRs()
+	" Try to substitute lowercase for initial captial
+	let result = substitute(a:word, "^\\u.*", "\\l\\0", "")
+	if result != a:word 
+		return result
+	endif
+	" if no change ocurred then word must start with lowercase so return
+	" with initial capitalised.
+	return substitute(a:word, "^\\U.*", "\\u\\0", "")
+endfunction
+
+" }}}
