@@ -84,6 +84,8 @@ Plug 'gu-fan/riv.vim'
 
 Plug 'jiangmiao/auto-pairs'
 
+Plug 'piersy/go-cover-vim'
+
 "" Add plugins to &runtimepath.
 call plug#end()
 "}}}
