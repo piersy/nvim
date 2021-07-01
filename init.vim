@@ -1125,22 +1125,39 @@ let g:instant_rst_browser = 'google-chrome'
 	vmap <c-_> <Plug>Commentary
 " }}}
 
-" Github graphql functions {{{
+" Work diary functions {{{
+"
+" for *.dir.md files
 
-" Toggles the first letter of word to be capital or lowercase.
-function! GetPRs()
-	" Try to substitute lowercase for initial captial
-	let result = substitute(a:word, "^\\u.*", "\\l\\0", "")
-	if result != a:word 
-		return result
-	endif
-	" if no change ocurred then word must start with lowercase so return
-	" with initial capitalised.
-	return substitute(a:word, "^\\U.*", "\\u\\0", "")
+function! s:IsInt(val)
+	return a:val =~# '^\d\+$'
 endfunction
 
-" }}}
+" GotoToday jumps to the line in the diary file that corresponds to today,
+" it's using the binary diary which I actually built from my work-diary repo
+" and moved to my path under the name diary.
+function! s:GotoToday()
+	" system runs a system command and returns the output, trim removes the
+	" trailing newline. %:p expands to the full path :h removes the last path
+	" element, :h can be used multiple times.
+	let line = trim(system('diary day --year 2021 --dir '.expand('%:p:h')))
+	if !s:IsInt(line)
+		echo line
+		return
+	endif
+	if line == -1
+		echom "Today not found in file"
+		return
+	endif
+	execute "normal! ".line."gg"
+endfunction
 
+augroup diary
+  autocmd!
+  autocmd BufNewFile,BufRead *.dir.md nnoremap <buffer> <silent> <leader>d :call <SID>GotoToday()<CR>
+augroup END
+
+" }}}
 
 
 
