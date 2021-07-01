@@ -889,6 +889,7 @@ function! ApplyCocVimSetup()
 	" LocationListToggle takes over to let us close the location list.
 	nnoremap <silent> <buffer> <leader><space> :call <SID>CocListToggle()<cr>
 	nnoremap <silent> <buffer> <leader>g :CocList outline<cr>
+	nnoremap <silent> <buffer> <leader>W :<c-u>CocList symbols<cr>
 
 
 	nnoremap <silent> <buffer> <c-l> :<c-u>CocNext<cr>
@@ -1139,3 +1140,8 @@ function! GetPRs()
 endfunction
 
 " }}}
+
+
+
+
+
