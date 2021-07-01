@@ -7,7 +7,8 @@
 		"<C-l>": "command:CocNext",
 		"<C-h>": "command:CocPrev"
 	},
-	"suggest.enablePreselect": true,
+	"suggest.enablePreselect": true,  // Select first item in menu, but don't insert it
+	"suggest.fixInsertedWord": false, // Don't overwrite the following characters when completing
 
 	"go.goplsOptions":{
 		// This ensures that function completion includes the parameters in the completion snippet.
