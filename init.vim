@@ -799,7 +799,7 @@ let g:airline#extensions#tabline#fnamemod = ':t'
 
 " coc nvim config {{{
 
-" coc nvim suggests these settings
+" coc nvim suggested settings {{{
 
 " Some servers have issues with backup files, see #649
 set nowritebackup
@@ -815,6 +815,10 @@ set shortmess+=c
 
 " always show signcolumns
 set signcolumn=yes
+"}}}
+
+let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-prettier','coc-eslint','coc-tsserver','coc-pyright','coc-go']
+
 
 let g:coc_snippet_next='<tab>'
 let g:coc_snippet_prev='<s-tab>'
