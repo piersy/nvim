@@ -852,8 +852,7 @@ augroup coc_vim_setup
 	" Organize imports on save
 	autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
 	" format on save
-	" autocmd BufWritePre *.go,*.py,*.js,*.ts,*.c,*.cpp,*.h,*.hpp :call CocAction('format')
-	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp :call CocAction('format')
+	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js :call CocAction('format')
 	" Update signature help on jump placeholder, this makes the function
 	" param help be displayed as you jump between function params when
 	" completing.
@@ -1069,40 +1068,25 @@ endfunction
 
 " typescript config {{{
 
-" The problem with this approach is that when you reload the buffer
-" TypeScriptConfig is called again and the autocommands it defines get stacked
-" up.
-"
-" There is also this approach ':%!prettier --write --use-tabs --parser typescript'
-" This suffers from losing the cursor position as does the existing solution
-" and there doesn't seems to be any way to simply fix that.
-"
-"function! FormatAndReloadBuffer()
-"	!prettier --write --use-tabs --parser typescript %
-"	edit
-"endfunction
-
 augroup typescript_config
 	autocmd!
 	autocmd filetype typescript call TypeScriptConfig()
 augroup END
 
 function! TypeScriptConfig()
-	" For this to work you need to have prettier
-	" 'npm install --global prettier'
-	setlocal formatprg=prettier\ --use-tabs\ --parser\ typescript tabstop=2
 	setlocal tabstop=2
-	" This applies this autocmd just to the buffer that triggered the filetype
-	" call to TypeScriptConfig we use normal with an exclamation mark since
-	" that means we use the default key mapping the mx places a mark and the
-	" `x moves us back to that mark. The middle part just fromats the whold
-	" file. The problem with the mark is after formatting you don't always
-	" move back to the exact same spot.
-	"autocmd BufWritePost <buffer> silent :normal! mxgggqG`x
-	"autocmd! BufWritePost <buffer> :call FormatAndReloadBuffer()
+endfunction
+"}}}
 
-	" This doesn't work cant chain os commands with vim commands using bar
-	"autocmd BufWritePost <buffer> :!prettier --write --use-tabs --parser typescript % | e
+" javascript config {{{
+
+augroup javascript_config
+	autocmd!
+	autocmd filetype javascript call JavascriptConfig()
+augroup END
+
+function! JavascriptConfig()
+	setlocal tabstop=2
 endfunction
 "}}}
 
