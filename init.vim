@@ -1057,7 +1057,7 @@ endfunction
 
 " Command to get prs with field and title and then insert the pr
 command! Prs call fzf#run(fzf#wrap({
-			\ 'source': 'ghapi prs --repo clearmatics/autonity --fields "title:%v ,url:[%v]"',
+			\ 'source': 'ghapi prs --repo celo-org/celo-blockchain --fields "title:%v ,url:[%v]"',
 			\ 'sink':    function('s:insert_line'), 
 			\ 'options': '--multi --extended --no-sort',
 			\ 'down':    '40%'}))
