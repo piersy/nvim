@@ -817,7 +817,7 @@ set shortmess+=c
 set signcolumn=yes
 "}}}
 
-let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-prettier','coc-eslint','coc-tsserver','coc-pyright','coc-go']
+let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-prettier','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rls']
 
 
 let g:coc_snippet_next='<tab>'
@@ -851,12 +851,12 @@ augroup coc_vim_setup
 	autocmd!
 	" Setup languages for which coc vim is enabled, also some require language
 	" server support in in coc-settings.json (:CocConfig).
-	autocmd filetype vim,go,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
+	autocmd filetype vim,go,c,cpp,javascript,typescript,python,rust call ApplyCocVimSetup()
 	" autocmd filetype vim,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
 	" Organize imports on save
 	autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
 	" format on save
-	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js :call CocAction('format')
+	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js,*.rs :call CocAction('format')
 	" Update signature help on jump placeholder, this makes the function
 	" param help be displayed as you jump between function params when
 	" completing.
