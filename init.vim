@@ -1,3 +1,24 @@
+" programming notes {{{
+"
+" A place to collect my learnings about vim because i write vimscript so
+" infrequently that I find myself often solving the same issue multipe times.
+"
+" A great reference for vimscript - https://learnxinyminutes.com/docs/vimscript
+"
+" Maintaining cursor locations between edit commands:
+"
+" 	I use getcurpos rather than winsaveview because winsaveview with
+" 	winrestview overwrites any messages that may have been echoed. I guess
+" 	because it really restores all parts of the window including what is
+" 	currently displayed in the statusbar.
+"	E.G:
+"   let pos = getcurpos()
+"	xxxx
+"	call setpos('.', pos)
+"
+"
+" }}}
+"
 " plugins {{{
 call plug#begin()
 " Make sure you use single quotes.
@@ -480,6 +501,10 @@ endfunction
 " Strips trailing whitespace and makes sure the cursor returns to it's initial
 " position.
 function! StripTrailingWhitespaces()
+	" Note I use getcurpos rather than winsaveview because winsaveview with
+	" winrestview overwrites any messages that may have been echoed. I guess
+	" because it really restores all parts of the window including what is
+	" currently displayed in the statusbar.
  	let pos = getcurpos()
 	%s/\s\+$//e
  	call setpos('.', pos)
