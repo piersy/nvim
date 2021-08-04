@@ -284,7 +284,7 @@ vnoremap <leader>d :Linediff<CR>
 
 
 " Close all other buffers
-command! BufOnly silent! execute "%bd|e#|bd#"
+command! BufOnly call <SID>CloseOtherBuffers()
 
 nnoremap <leader>a :<c-u>BufOnly<cr>
 
@@ -480,10 +480,9 @@ endfunction
 " Strips trailing whitespace and makes sure the cursor returns to it's initial
 " position.
 function! StripTrailingWhitespaces()
-	let l = line(".")
-	let c = col(".")
+ 	let pos = getcurpos()
 	%s/\s\+$//e
-	call cursor(l, c)
+ 	call setpos('.', pos)
 endfun
 
 "" Highlight trainling spaces red, its important that this matches '*' since it
@@ -518,6 +517,12 @@ nnoremap <Leader>F :execute(":S " . input('Regex-off: /'))<CR>
 " Map Y (which amazingly isn't mapped to anything by default) to yank the
 " current filename + linenumber + line(on a newline)
 nnoremap Y :let @+ = expand("%").":".line(".")."\n".getline(".")<CR>
+
+function! s:CloseOtherBuffers()
+ 	let pos = getcurpos()
+	silent! execute "%bd|e#|bd#"
+ 	call setpos('.', pos)
+endfunction
 
 "}}}
 
