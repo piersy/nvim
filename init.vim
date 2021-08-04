@@ -467,61 +467,6 @@ endfunction
 "}}}
 
 " git rebase buffer key mappings {{{
-"
-" For refernence these are the filetypes set for git.
-" git
-" gitconfig
-" gitrebase
-" gitsendemail
-"
-"function! s:OutputInGitWindow(cmdline)
-"	" Open new vertical window
-"	vert new
-"	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap filetype=git
-"	file "" . a:cmdline
-"
-"	" Name the buffer with the command we executed.
-"	" In order to call file with an argument we need to use execute. This is
-"	" becuause file doesn't accept variables as its arguments. We can infer
-"	" this from the doc since commands that can interpret variables (eg echo)
-"	" use '{expr}' to refer to their arguments whereas file doc simply lists
-"	" '{name}'. 
-"	silent execute 'file Command: ' . a:cmdline
-"
-"	"0read makes read insert text below the 0th line
-"	silent execute '0read !' . a:cmdline
-"	1 " go to first line
-"endfunction
-"function! s:GetGitSha()
-"	" Return first match in current line of 8 hex chars with a space at either
-"	" end
-"	return trim(matchstr(getline("."),' \x\{7} '))
-"endfunction
-"
-"function! s:GetShaRange()
-"	" Return first match in current line of 8 hex chars with a space at either
-"	" end
-"	"GetGitSha
-"	"# Rebase 056af67..ef7b34d onto 056af67 (4 commands)
-"	let line=search('\v# Rebase \x{7}\.\.\x{7} onto \x{7} \(\d+ commands\)')
-"	return matchstr(getline(line), '\v\x{7}\.\.\x{7}')
-"endfunction
-"
-"function! s:DisplayCommit(options)
-"	let commitsha = s:GetGitSha()
-"	if commitsha != ""
-"		call s:OutputInGitWindow('git show ' . a:options .' '. commitsha)
-"	endif
-"endfunction
-
-"function! s:DisplayLog(options)
-"	let range = s:GetShaRange()
-"	if range != ""
-"		call s:OutputInGitWindow('git log --reverse ' . a:options . ' ' . range)
-"	endif
-"endfunction
-"
-
 augroup rebase_keymaps
 	autocmd!
 	autocmd filetype gitrebase call s:ConfigureRebaseKeymaps()
@@ -536,23 +481,6 @@ function! s:ConfigureRebaseKeymaps()
 	nnoremap <silent> <buffer> <leader>d :call rebaseview#DisplayCommit('')<CR>
 	nnoremap <silent> <buffer> <leader>l :call rebaseview#DisplayLog('--stat')<CR>
 endfunction
-
-"augroup gitrebase_maps
-"	autocmd!
-"	autocmd filetype gitrebase call s:ConfigureGitRebase()
-"augroup END
-"
-"function! s:ConfigureGitRebase()
-"	" Map K again in buffer specific mode since it is mapped by vim by default
-"	" to show the commit uner the cursor, it does this by setting keywordprg
-"	" to 'git show'
-"	nnoremap <buffer> K <C-U>
-"	nnoremap <silent> <buffer> <leader>e :call rebaseview#DisplayCommit('--stat')<CR>
-"	nnoremap <silent> <buffer> <leader>d :call rebaseview#DisplayCommit('')<CR>
-"	nnoremap <silent> <buffer> <leader>l :call rebaseview#DisplayLog('--stat')<CR>
-"endfunction
-
-
 " end gitrebase keymappings }}}
 
 " end genric key mappings }}}
