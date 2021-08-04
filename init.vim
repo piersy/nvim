@@ -429,52 +429,6 @@ augroup END
 nnoremap <C-u> :<C-u>bp<CR>
 nnoremap <C-p> :<C-u>bn<CR>
 
-" {{{ Moving over to location list with coc nvim
-" function! QFixToggle()
-" 	let qf = filter(range(1, winnr('$')), 'getwinvar(v:val, "&ft") == "qf"')
-" 	if len(qf) > 0
-" 		cclose
-" 	else
-" 		let curr_win = winnr()
-" 		copen
-" 		:execute curr_win . "wincmd w"
-" 	endif
-" endfunction
-
-" " Easy quickfix closing
-" nnoremap <leader><Space> :<C-u>call QFixToggle()<CR>
-
-" " This sets up commands to loop through the quickfix list. Normal
-" " behaviour will only acknowledge cnext or cprev if there is more than one
-" " quickfix entry.
-" command! Cnext try | cnext | catch | cfirst | catch | endtry
-" command! Cprev try | cprev | catch | clast | catch | endtry
-
-" " Cycle through entries in the quickfix
-" nnoremap <C-l> :<C-u>Cnext<CR>
-" nnoremap <C-h> :<C-u>Cprev<CR>
-" }}}
-
-" {{{ LocationList config
-"function! s:LocationListToggle() abort
-"" Try and close the location list and then if the buffer count didn't
-"	" change we know it was not open so we open it.
-"	"
-"    let buffer_count_before = s:BufferCount()
-"    lclose
-
-"    if s:BufferCount() == buffer_count_before
-"        lopen
-"    endif
-"endfunction
-
-"function! s:BufferCount() abort
-"    return len(filter(range(1, bufnr('$')), 'bufwinnr(v:val) != -1'))
-"endfunction
-
-"nmap <silent> <leader><space> :call <SID>LocationListToggle()<cr>
-" }}}
-
 " Remap b for split keyboard
 nnoremap m b
 nnoremap M B
