@@ -158,16 +158,6 @@ set autoread
 " Make new windows appear on the right
 set splitright
 
-"augroup help_setup
-"	autocmd!
-"	autocmd FileType help setlocal buflisted
-"	autocmd filetype help call ApplyHelpSetup()
-"augroup END
-"
-"function! ApplyHelpSetup()
-"	autocmd BufEnter <buffer> setlocal conceallevel=2 | echom "enterning"
-"endfunction
-
 " Make help buffers be listed as normal buffers and ensure that the
 " conceallevel is maintained. I'm not sure why but when setting a help buffer
 " to be listed, navigating away from it and back again seems to reset the
