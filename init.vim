@@ -18,7 +18,7 @@
 "
 "
 " }}}
-"
+
 " plugins {{{
 call plug#begin()
 " Make sure you use single quotes.
@@ -67,6 +67,7 @@ Plug 'moll/vim-bbye'
 
 " fzf plugin from the fzf repo at that location
 Plug '~/.fzf'
+"Plug '~/.nix-profile/share/vim-plugins/fzf/plugin/fzf.vim'
 " the fzf vim plugin which depends on the fzf plugin
 Plug 'junegunn/fzf.vim'
 
@@ -117,6 +118,7 @@ let g:rst_fold_enabled=1
 
 " abbreviations {{{
 iabbrev netowrk network
+iabbrev timout timeout
 "}}}
 
 " Arpeggio needs to be loaded as the init.vim is parsed so that
@@ -125,16 +127,24 @@ call arpeggio#load()
 
 
 " Sets the molokai colorscheme without this line you get normal colors.
-" colorscheme molokai
+colorscheme molokai
 " if has("termguicolors")
 " 	set termguicolors
 " endif
+"let g:rehash256 = 1
+"let g:molokai_original = 1
 
 " Work around for broken xfce4-terminal stops garbage characters being printed
 " in neovim 0.2.2+
 set guicursor=
 
 set shortmess-=F
+
+" temp utility functions {{{
+" exe "normal! ggHwwi'^[%a'^[" | :%s/\n/ /g
+command! RML :g/\s*\/\//d
+command! Tracer :%s/\s*\/\/.*// | :execute "normal! gg^wwi'<esc>%a'<esc>" | :%s/\n/ /g
+" }}}
 
 " generic vim options {{{
 set errorbells
@@ -178,6 +188,19 @@ set autoread
 
 " Make new windows appear on the right
 set splitright
+
+" Make sure wrapping wraps at word boundaries.
+set linebreak
+
+"augroup help_setup
+"	autocmd!
+"	autocmd FileType help setlocal buflisted
+"	autocmd filetype help call ApplyHelpSetup()
+"augroup END
+"
+"function! ApplyHelpSetup()
+"	autocmd BufEnter <buffer> setlocal conceallevel=2 | echom "enterning"
+"endfunction
 
 " Make help buffers be listed as normal buffers and ensure that the
 " conceallevel is maintained. I'm not sure why but when setting a help buffer
@@ -305,7 +328,10 @@ vnoremap <leader>d :Linediff<CR>
 
 
 " Close all other buffers
-command! BufOnly call <SID>CloseOtherBuffers()
+" mq marks the cursor location in buffer q and `q restores that locaiton, the
+" rest is a command that closes all other buffers, not sure about how exactly
+" it does it but it works.
+command! BufOnly silent! execute "normal! mq:%bd|e#|bd#<cr>`q"
 
 nnoremap <leader>a :<c-u>BufOnly<cr>
 
@@ -350,7 +376,7 @@ nnoremap <leader>c :<C-u>call CloseBufferOrQuit()<CR>
 nnoremap <leader>q :<C-u>quitall<CR>
 nnoremap <leader><ESC> :<C-u>quitall!<CR>
 
-nnoremap <leader>w :<C-u>vsplit<CR>
+nnoremap <leader>v :<C-u>vsplit<CR>
 nnoremap <leader>k :<C-u>close<CR>
 nnoremap <leader>j gqk
 vnoremap <leader>j gq
@@ -373,8 +399,15 @@ Arpeggio inoremap df <esc>
 
 " Map df to the equivalent of escape for commandline.
 Arpeggio cnoremap df <C-c>
-" Make esc in normal mode clear highlighting.
-Arpeggio noremap <silent> df :<C-u>nohlsearch<CR><esc>
+" Make esc in normal mode clear highlighting. And then execute esc in a
+" recursive manner, this means this will work as esc is inteded to within
+" contexts where a plugin has rebound esc.
+Arpeggio nmap <silent> df :<C-u>nohlsearch<CR><esc>
+
+" Allow escaping from visual mode, even if I don't use this much, not having
+" it is very confusing since pressing df will delete the visual selection, so
+" I keep it here.
+Arpeggio vnoremap df <esc>
 
 " Map fn to equivalient of escape in terminal mode. We can't map df here
 " otherwise when we have vim inside a terminal in vim and we escape the df
@@ -658,7 +691,7 @@ set shortmess+=c
 set signcolumn=yes
 "}}}
 
-let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-prettier','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rls']
+let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rust-analyzer']
 
 
 let g:coc_snippet_next='<tab>'
@@ -692,19 +725,33 @@ augroup coc_vim_setup
 	autocmd!
 	" Setup languages for which coc vim is enabled, also some require language
 	" server support in in coc-settings.json (:CocConfig).
-	autocmd filetype vim,go,c,cpp,javascript,typescript,python,rust call ApplyCocVimSetup()
+	autocmd filetype vim,go,c,cpp,javascript,typescript,python,rust,yaml call ApplyCocVimSetup()
 	" autocmd filetype vim,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
 	" Organize imports on save
 	autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
 	" format on save
-	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js,*.rs :call CocAction('format')
+	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js,*.rs,*.yml,*.yaml :call CocAction('format')
 	" Update signature help on jump placeholder, this makes the function
 	" param help be displayed as you jump between function params when
 	" completing.
 	autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
 	autocmd User CocLocationsChange CocList --no-quit --normal location
+
+	" Adjust the size of the coctree view to be at most 1/2 the screen
+	" otherwise the longest line length in the window
+	" 
+	" This is an example of chaining 2 autocmds I'm not sure why but if we try
+	" to apply the second autocmd without the <buffer> option then it doesnt
+	" seem to trigger, maybe because it doesn't really make sense ... anyway
+	" who knows. So this command basically adds an autocmd to the coctree
+	" buffer that will set the winwidth option whenever the text changes and
+	" it sets the width to be the smaller of the longest line or 1/2 the total
+	" vim instance with.
+	" autocmd FileType coctree autocmd TextChanged <buffer> let &winwidth = min([&columns/2, max(map(getline(1,'$'), 'len(v:val)'))])
 augroup END
 
+" This is workikng
+" autocmd! FileType coctree autocmd TextChanged <buffer> let &winwidth = min([&columns/2, float2nr(max(map(getline(1,'$'), 'len(v:val)')) * 1.2)])
 
 function! ApplyCocVimSetup()
 	nmap <silent> <buffer> <leader>d <Plug>(coc-definition)
@@ -713,6 +760,8 @@ function! ApplyCocVimSetup()
 	" u for usages, we save r for rename
 	nmap <silent> <buffer> <leader>u <Plug>(coc-references)
 	nmap <silent> <buffer> <leader>r <Plug>(coc-rename)
+	nmap <silent> <buffer> <leader>h :call CocAction('showIncomingCalls')<CR>
+	" h for hierarchy 
 	" Toggle from public to private
 	nnoremap <buffer> <expr> <leader>m ':call CocAction("rename", "' . ToggleCapital(expand("<cword>")) . '")<cr>'
 	" This searches for a string and finds all occurrences and lets us edit
@@ -733,7 +782,7 @@ function! ApplyCocVimSetup()
 	" LocationListToggle takes over to let us close the location list.
 	nnoremap <silent> <buffer> <leader><space> :call <SID>CocListToggle()<cr>
 	nnoremap <silent> <buffer> <leader>g :CocList outline<cr>
-	nnoremap <silent> <buffer> <leader>W :<c-u>CocList symbols<cr>
+	nnoremap <silent> <buffer> <leader>w :<c-u>CocList symbols<cr>
 
 
 	nnoremap <silent> <buffer> <c-l> :<c-u>CocNext<cr>
@@ -741,8 +790,12 @@ function! ApplyCocVimSetup()
 
 	nmap <silent> <buffer> <m-.> <Plug>(coc-diagnostic-next-error)
 	nmap <silent> <buffer> <m-,> <Plug>(coc-diagnostic-prev-error)
-	nmap <silent> <buffer> <c-]> <Plug>(coc-diagnostic-next)
-	nmap <silent> <buffer> <c-[> <Plug>(coc-diagnostic-next)
+
+	" ctrl + [ results in <esc> so we can't use these mappings, but i didn't
+	" really use them anyway, usually I just browse the list. Leving this here
+	" so I don't make the same mistake in the future.
+	" nmap <silent> <buffer> <c-]> <Plug>(coc-diagnostic-next)
+	" nmap <silent> <buffer> <c-[> <Plug>(coc-diagnostic-next)
 	nmap <silent> <buffer> <leader>f <Plug>(coc-fix-current)
 
 
@@ -758,7 +811,9 @@ function! ApplyCocVimSetup()
 	omap af <Plug>(coc-funcobj-a)
 
 
-	nnoremap <silent> <buffer> <leader>h :call CocAction('doHover')<CR>
+	" disabled in favour of call hierarchy
+	" nnoremap <silent> <buffer> <leader>h :call CocAction('doHover')<CR>
+	nnoremap <silent> <buffer> <leader>l :call CocAction('doHover')<CR>
 
 	" Map jk to insert the command wait for a few milliseconds for coc to add
 	" the brackets if its a function (not sure how coc does this) and then esc
@@ -834,25 +889,40 @@ au Syntax * RainbowParenthesesLoadBraces
 
 "fzf config {{{
 
+
+" I spent some time investigating rg vs ag for the find functions, I was using
+" the following:
+"
+"ag --nogroup --column --hidden --all-text --follow --ignore-dir '.git'  '^(?=.)' | awk -F ":" '{print $1}' | sort | uniq > agfiles
+"
+"rg --column --line-number --no-heading  --ignore-case --no-ignore --hidden --follow --glob '!*.git/*' '' | awk -F ":" '{print $1}' | sort | uniq > rgfiles
+"
+" It turns out that when you use the all-text option for ag it overrides the
+" ignore or ingore-dir flags which really makes it unsuited for what I want to
+" do. Performance wise both these commands seemed to take about the same
+" amount of time before trying to exclude git, although rg was returning
+" results from more files, so is probably a mite faster. Also ag seemed to not
+" include some files and I couldn't understand why. So the winner is rg
+
 " consider moving all fzf mappings to use alt (m) so that they are easier to
 " remember
 nnoremap <m-o> :<C-u>:MyFiles<CR>
+nnoremap <m-i> :<c-u>Find<cr>
 nnoremap <m-j> :<C-u>:History:<CR>
 nnoremap <m-l> :<C-u>:Lines<CR>
 nnoremap <m-b> :<c-u>Buffers<cr>
-nnoremap <m-i> :<C-u>:Find<CR>
+
 
 " This command behaves the same as the one I use on the commandline for
 " opening files.
 command! -nargs=? MyFiles call fzf#run(fzf#wrap({
-			\ 'source': 'fd --hidden --type f',
+			\ 'source': 'fd --hidden --type f --exclude .git',
 			\ 'options': '--multi --extended --no-sort',
 			\ 'down':    '40%',
 			\ 'dir': <q-args>}))
 
 
-"
-" FZF with ripgrep FTW!!!
+" FZF with ripgrep
 " --column: Show column number
 " --line-number: Show line number
 " --no-heading: Do not show file headings in results
@@ -863,23 +933,9 @@ command! -nargs=? MyFiles call fzf#run(fzf#wrap({
 " --follow: Follow symlinks
 " --glob: Additional conditions for search (in this case ignore everything in the .git/ folder)
 " --color: Search color options
-"command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1, <bang>0)
-"
-
 command! -bang -nargs=* Find
 			\ call fzf#vim#grep(
-			\   'rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1,
-			\   <bang>0 ? fzf#vim#with_preview('up:60%')
-			\           : fzf#vim#with_preview('right:50%:hidden', '?'),
-			\   <bang>0)
-set grepprg=rg\ --vimgrep
-
-
-
-" Similarly, we can apply it to fzf#vim#grep. To use ripgrep instead of ag:
-command! -bang -nargs=* Rg
-			\ call fzf#vim#grep(
-			\   'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>), 1,
+			\   'rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!*.git/*" --color "always" '.shellescape(<q-args>), 1,
 			\   <bang>0 ? fzf#vim#with_preview('up:60%')
 			\           : fzf#vim#with_preview('right:50%:hidden', '?'),
 			\   <bang>0)
@@ -895,8 +951,7 @@ function! s:all_files()
   return map(filter(range(1, bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)')
 endfunction
 
-
-" Command to get prs with field and title and then insert the pr
+" Commend to get prs with field and title and then insert the pr
 command! Prs call fzf#run(fzf#wrap({
 			\ 'source': 'ghapi prs --repo celo-org/celo-blockchain --fields "title:%v ,url:[%v]"',
 			\ 'sink':    function('s:insert_line'), 
@@ -907,7 +962,6 @@ function! s:insert_line(item)
     let @z=a:item
     norm "zp
 endfunction
-
 
 "}}}
 
@@ -954,6 +1008,12 @@ let g:instant_rst_browser = 'google-chrome'
 	vmap <c-_> <Plug>Commentary
 " }}}
 
+" Vim fugitive mappings {{{
+
+nnoremap <F1> :<C-u>Git blame<CR>
+
+" }}}
+
 " Work diary functions {{{
 "
 " for *.dir.md files
@@ -969,7 +1029,7 @@ function! s:GotoToday()
 	" system runs a system command and returns the output, trim removes the
 	" trailing newline. %:p expands to the full path :h removes the last path
 	" element, :h can be used multiple times.
-	let line = trim(system('diary day --year 2021 --dir '.expand('%:p:h')))
+	let line = trim(system('diary day --year '.strftime('%Y').' --dir '.expand('%:p:h')))
 	if !s:IsInt(line)
 		echo line
 		return
@@ -989,5 +1049,123 @@ augroup END
 " }}}
 
 
+command! LogAutocmds call s:log_autocmds_toggle()
+
+function! s:log_autocmds_toggle()
+  augroup LogAutocmd
+    autocmd!
+  augroup END
+
+  let l:date = strftime('%F', localtime())
+  let s:activate = get(s:, 'activate', 0) ? 0 : 1
+  if !s:activate
+    call s:log('Stopped autocmd log (' . l:date . ')')
+    return
+  endif
+
+  call s:log('Started autocmd log (' . l:date . ')')
+  augroup LogAutocmd
+    for l:au in s:aulist
+      silent execute 'autocmd' l:au '* call s:log(''' . l:au . ''')'
+    endfor
+  augroup END
+endfunction
+
+function! s:log(message)
+  silent execute '!echo "'
+        \ . strftime('%T', localtime()) . ' - ' . a:message . '"'
+        \ '>> /tmp/vim_log_autocommands'
+endfunction
+
+" These are deliberately left out due to side effects
+" - SourceCmd
+" - FileAppendCmd
+" - FileWriteCmd
+" - BufWriteCmd
+" - FileReadCmd
+" - BufReadCmd
+" - FuncUndefined
+
+let s:aulist = [
+      \ 'BufNewFile',
+      \ 'BufReadPre',
+      \ 'BufRead',
+      \ 'BufReadPost',
+      \ 'FileReadPre',
+      \ 'FileReadPost',
+      \ 'FilterReadPre',
+      \ 'FilterReadPost',
+      \ 'StdinReadPre',
+      \ 'StdinReadPost',
+      \ 'BufWrite',
+      \ 'BufWritePre',
+      \ 'BufWritePost',
+      \ 'FileWritePre',
+      \ 'FileWritePost',
+      \ 'FileAppendPre',
+      \ 'FileAppendPost',
+      \ 'FilterWritePre',
+      \ 'FilterWritePost',
+      \ 'BufAdd',
+      \ 'BufCreate',
+      \ 'BufDelete',
+      \ 'BufWipeout',
+      \ 'BufFilePre',
+      \ 'BufFilePost',
+      \ 'BufEnter',
+      \ 'BufLeave',
+      \ 'BufWinEnter',
+      \ 'BufWinLeave',
+      \ 'BufUnload',
+      \ 'BufHidden',
+      \ 'BufNew',
+      \ 'SwapExists',
+      \ 'FileType',
+      \ 'Syntax',
+      \ 'EncodingChanged',
+      \ 'TermChanged',
+      \ 'VimEnter',
+      \ 'GUIEnter',
+      \ 'GUIFailed',
+      \ 'TermResponse',
+      \ 'QuitPre',
+      \ 'VimLeavePre',
+      \ 'VimLeave',
+      \ 'FileChangedShell',
+      \ 'FileChangedShellPost',
+      \ 'FileChangedRO',
+      \ 'ShellCmdPost',
+      \ 'ShellFilterPost',
+      \ 'CmdUndefined',
+      \ 'SpellFileMissing',
+      \ 'SourcePre',
+      \ 'VimResized',
+      \ 'FocusGained',
+      \ 'FocusLost',
+      \ 'CursorHold',
+      \ 'CursorHoldI',
+      \ 'CursorMoved',
+      \ 'CursorMovedI',
+      \ 'WinEnter',
+      \ 'WinLeave',
+      \ 'TabEnter',
+      \ 'TabLeave',
+      \ 'CmdwinEnter',
+      \ 'CmdwinLeave',
+      \ 'InsertEnter',
+      \ 'InsertChange',
+      \ 'InsertLeave',
+      \ 'InsertCharPre',
+      \ 'TextChanged',
+      \ 'TextChangedI',
+      \ 'ColorScheme',
+      \ 'RemoteReply',
+      \ 'QuickFixCmdPre',
+      \ 'QuickFixCmdPost',
+      \ 'SessionLoadPost',
+      \ 'MenuPopup',
+      \ 'CompleteDone',
+      \ 'User',
+      \ ]
 
 

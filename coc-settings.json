@@ -13,5 +13,6 @@
 	"go.goplsOptions":{
 		// This ensures that function completion includes the parameters in the completion snippet.
 		"usePlaceholders":true 
-	}
+	},
+	"tree.key.toggleSelection": "s" // By default this is set to space but that interferes with all my leader commands so set to s
 }
