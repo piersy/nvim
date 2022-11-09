@@ -50,8 +50,9 @@ Plug 'guns/xterm-color-table.vim'
 " lang server support.
 "Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'} "{'branch': 'release'} {'tag': 'v0.0.78'}
 "Plug 'piersy/coc.nvim', { 'dir': '~/projects/coc.nvim', 'do': 'yarn install --frozen-lockfile' }
-"Plug 'neoclide/coc.nvim', {'tag': 'v1.23' } "{'branch': 'release'} {'tag': 'v0.0.78'}
-Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'} "{'tag': 'v0.0.78'}
+" Plug 'neoclide/coc.nvim', {'tag': 'v1.23' } "{'branch': 'release'} {'tag': 'v0.0.78'}
+" Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'} "{'tag': 'v0.0.78'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " I took the snippets from vim-go and put them in their own repo
 Plug 'piersy/vim-snippets-go', {'branch': 'main'}
@@ -127,6 +128,7 @@ call arpeggio#load()
 
 
 " Sets the molokai colorscheme without this line you get normal colors.
+"set termguicolors
 colorscheme molokai
 " if has("termguicolors")
 " 	set termguicolors
@@ -418,7 +420,7 @@ Arpeggio vnoremap df <esc>
 Arpeggio tnoremap fn <C-\><C-n>G?^\$<CR>:<C-u>nohlsearch<CR>
 
 " Remove the original esc key functionality.
-inoremap <esc> <NOP>
+" inoremap <esc> <NOP>
 cnoremap <esc> <NOP>
 noremap <esc> <NOP>
 
@@ -640,8 +642,8 @@ endfunction
 "let g:deoplete#enable_at_startup = 1
 
 " navigate the menu with cj and ck
-inoremap <C-j> <C-n>
-inoremap <C-k> <C-p>
+" inoremap <C-j> <C-n>
+" inoremap <C-k> <C-p>
 
 "}}}
 
@@ -690,6 +692,10 @@ set shortmess+=c
 " always show signcolumns
 set signcolumn=yes
 "}}}
+
+" We need to override this as coc vim does some dynamic setting based on the
+" color scheme and it doesn't work for molokai
+hi! link CocMenuSel PmenuSel
 
 let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rust-analyzer']
 
@@ -818,7 +824,14 @@ function! ApplyCocVimSetup()
 	" Map jk to insert the command wait for a few milliseconds for coc to add
 	" the brackets if its a function (not sure how coc does this) and then esc
 	" to normal.
-	Arpeggio imap <buffer> <expr> jk pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
+	" Arpeggio imap <buffer> <expr> jk pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
+
+	" coc has its own pop up menu so we need to set our keys for coc here
+    Arpeggio imap <buffer> <expr> jk coc#pum#visible() ? coc#_select_confirm() : "\<CR>"
+	" Insert <tab> when previous text is space, refresh completion if not.
+	inoremap <silent><expr> <c-j> coc#pum#visible() ? coc#pum#next(1) : ""
+	inoremap <silent><expr> <c-k> coc#pum#visible() ? coc#pum#prev(1) : ""
+
 	" Map enter to insert the top command and continue in insert.
 	"inoremap <buffer> <expr> <cr> pumvisible() ? "\<c-y>\<cmd>sleep 80m\<cr>\<esc>" : "\<c-g>u\<cr>"
 	"inoremap <buffer> <expr> <esc> pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
@@ -837,6 +850,22 @@ function! ApplyCocVimSetup()
 	" Map ctrl+space to manually open completion, great for completing structs
 	" in golang.
 	inoremap <silent> <c-space> <C-R>=coc#start()<CR>
+
+	" coc has its own menu now!
+	" inoremap <expr><C-J> pumvisible() ? "\<C-n>" : "\<C-J>"
+	" inoremap <expr><C-K> pumvisible() ? "\<C-p>" : "\<C-K>"
+
+	inoremap <silent><expr> <TAB>
+				\ coc#pum#visible() ? coc#pum#next(1) :
+				\ CheckBackspace() ? "\<Tab>" :
+				\ coc#refresh()
+	inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+	inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+	function! CheckBackspace() abort
+		let col = col('.') - 1
+		return !col || getline('.')[col - 1]  =~# '\s'
+	endfunction
 
 endfunction
 
@@ -1169,3 +1198,4 @@ let s:aulist = [
       \ ]
 
 
+imap <c-3> 3
