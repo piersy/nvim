@@ -130,6 +130,14 @@ call arpeggio#load()
 " Sets the molokai colorscheme without this line you get normal colors.
 "set termguicolors
 colorscheme molokai
+
+" Im not sure when this happened but visual is almoste impossible to see
+" Lately
+hi Visual ctermbg=241
+" Comments became tricky to see as well
+hi Comment ctermfg=245
+" The highlighting on the current line of coc list was also tricky
+hi CursorLine ctermbg=244
 " if has("termguicolors")
 " 	set termguicolors
 " endif
@@ -380,6 +388,8 @@ nnoremap <leader><ESC> :<C-u>quitall!<CR>
 
 nnoremap <leader>v :<C-u>vsplit<CR>
 nnoremap <leader>k :<C-u>close<CR>
+
+" Format text
 nnoremap <leader>j gqk
 vnoremap <leader>j gq
 
@@ -731,7 +741,7 @@ augroup coc_vim_setup
 	autocmd!
 	" Setup languages for which coc vim is enabled, also some require language
 	" server support in in coc-settings.json (:CocConfig).
-	autocmd filetype vim,go,c,cpp,javascript,typescript,python,rust,yaml call ApplyCocVimSetup()
+	autocmd filetype sh,vim,go,c,cpp,javascript,typescript,python,rust,yaml call ApplyCocVimSetup()
 	" autocmd filetype vim,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
 	" Organize imports on save
 	autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
@@ -866,6 +876,9 @@ function! ApplyCocVimSetup()
 		let col = col('.') - 1
 		return !col || getline('.')[col - 1]  =~# '\s'
 	endfunction
+
+	nmap <buffer> <leader>y <Plug>(coc-codeaction-cursor)
+	nmap <buffer> <leader>; <Plug>(coc-codelens-action)
 
 endfunction
 

@@ -1,4 +1,5 @@
 {
+	"codeLens.enable": true,
 	"list.normalMappings": {
 		"<C-l>": "command:CocNext",
 		"<C-h>": "command:CocPrev"
@@ -14,5 +15,9 @@
 		// This ensures that function completion includes the parameters in the completion snippet.
 		"usePlaceholders":true 
 	},
+	"rust-analyzer.lens.enable": true,
+	"rust-analyzer.cargo.buildScripts.enable": true,
+	"rust-analyzer.cargo.loadOutDirsFromCheck": true,
+	"rust-analyzer.procMacro.attributes.enable": true,
 	"tree.key.toggleSelection": "s" // By default this is set to space but that interferes with all my leader commands so set to s
 }
