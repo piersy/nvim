@@ -105,9 +105,11 @@ Plug 'gu-fan/riv.vim'
 " Support for rst preview
 "Plug 'gu-fan/InstantRst'
 
-Plug 'jiangmiao/auto-pairs'
+" Plug 'jiangmiao/auto-pairs'
 
 Plug 'piersy/go-cover-vim'
+
+
 
 "" Add plugins to &runtimepath.
 call plug#end()
@@ -126,7 +128,7 @@ iabbrev timout timeout
 " it can be used for defining key mappings.
 call arpeggio#load()
 
-
+let g:python3_host_prog = '/usr/bin/python3'
 " Sets the molokai colorscheme without this line you get normal colors.
 "set termguicolors
 colorscheme molokai
@@ -500,6 +502,14 @@ nnoremap \ @:
 " I had to use crtl+v in insert mode to find the keycode for ctrl+backspace.
 inoremap  <C-W>
 
+" Map ctrl+f to filter lines in the file based on the selected text, by
+" default ctrl+f is mapped to page down which I do not use.
+" This command works by yanking the text and then pasting it into the command
+" line using <c-r>r to paste from register r (a register that I will probably
+" never use in my normal day to day vim use).
+vnoremap <c-f> "ry:v/<c-r>r/d<cr>
+
+
 " help buffer key mappings {{{
 
 " Toggle help filetype, unfortunately tab is also <c-i> and so interferes with
@@ -595,7 +605,6 @@ function! s:CloseOtherBuffers()
 endfunction
 
 "}}}
-
 
 " yaml file type config {{{
 augroup yaml_config
@@ -707,8 +716,7 @@ set signcolumn=yes
 " color scheme and it doesn't work for molokai
 hi! link CocMenuSel PmenuSel
 
-let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rust-analyzer']
-
+let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rust-analyzer', 'coc-pairs', 'coc-git', 'coc-json']
 
 let g:coc_snippet_next='<tab>'
 let g:coc_snippet_prev='<s-tab>'
@@ -829,22 +837,16 @@ function! ApplyCocVimSetup()
 
 	" disabled in favour of call hierarchy
 	" nnoremap <silent> <buffer> <leader>h :call CocAction('doHover')<CR>
-	nnoremap <silent> <buffer> <leader>l :call CocAction('doHover')<CR>
+	nnoremap <silent> <buffer> <leader>l :call CocAction('doHover')<cr>
 
-	" Map jk to insert the command wait for a few milliseconds for coc to add
-	" the brackets if its a function (not sure how coc does this) and then esc
-	" to normal.
-	" Arpeggio imap <buffer> <expr> jk pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
+	" This is the new way to insert completions in coc Jan 2023... Should i
+	" use coc#_select_confirm() instead of pum#confirm?
+	inoremap <silent> <buffer> <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<cr>"
 
-	" coc has its own pop up menu so we need to set our keys for coc here
-    Arpeggio imap <buffer> <expr> jk coc#pum#visible() ? coc#_select_confirm() : "\<CR>"
-	" Insert <tab> when previous text is space, refresh completion if not.
-	inoremap <silent><expr> <c-j> coc#pum#visible() ? coc#pum#next(1) : ""
-	inoremap <silent><expr> <c-k> coc#pum#visible() ? coc#pum#prev(1) : ""
 
-	" Map enter to insert the top command and continue in insert.
-	"inoremap <buffer> <expr> <cr> pumvisible() ? "\<c-y>\<cmd>sleep 80m\<cr>\<esc>" : "\<c-g>u\<cr>"
-	"inoremap <buffer> <expr> <esc> pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
+	" With cocs new menu we need a different command to navigate it
+	inoremap <silent> <buffer> <expr> <C-j> coc#pum#visible() ? coc#pum#next(1) : "\<c-j>"
+	inoremap <silent> <buffer> <expr> <C-k> coc#pum#visible() ? coc#pum#prev(1) : "\<c-k>"
 
 	" So in order to compose the filetype and the CursorHold events we need to
 	" use an augroup in an augroup so that we can reliably clear previous
@@ -1090,6 +1092,7 @@ augroup END
 
 " }}}
 
+" Autocmd logging utils {{{
 
 command! LogAutocmds call s:log_autocmds_toggle()
 
@@ -1210,5 +1213,46 @@ let s:aulist = [
       \ 'User',
       \ ]
 
+" }}}
 
-imap <c-3> 3
+" Git linking utils {{{
+
+command! LogAutocmds call s:log_autocmds_toggle()
+
+function! ShowGithubLink()
+
+	" Find repo root
+	let s:root = finddir('.git/..', expand('%:p:h').';')
+
+	let s:base = trim(system('cd ' . s:root . '&& git config --get remote.origin.url'))
+	if s:base !~ 'github'
+		echo "Not a github repository" . s:base
+		return
+	end
+
+	" Remove .git suffix
+	let s:base = substitute(s:base, "\\.git$", "", "")
+	" Convert to http link if ssh
+	if s:base =~ 'git@github'
+		 echo "Not https " . s:base
+	 	 let s:base = substitute(s:base, "git@github.com:", "https://github.com/", "")
+		 echo "Substitue " . s:base
+	end
+
+	" Find the branch name
+	let s:branch = trim(system('cd ' . s:root . '&& git symbolic-ref --short HEAD'))
+
+	" Find full file path
+	let s:file_path = expand('%:p')
+	" Find relative path
+	let s:relative_path = substitute(s:file_path, s:root, "", "")
+
+	let s:line = getcurpos()[1]
+
+	let s:link = s:base . '/blob/' . s:branch .  s:relative_path . '#L' . s:line
+
+	echo "link " . s:link
+
+endfunction
+
+" end Git linking utils }}}
