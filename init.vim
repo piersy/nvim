@@ -948,20 +948,17 @@ au Syntax * RainbowParenthesesLoadBraces
 " results from more files, so is probably a mite faster. Also ag seemed to not
 " include some files and I couldn't understand why. So the winner is rg
 
-" consider moving all fzf mappings to use alt (m) so that they are easier to
-" remember
 nnoremap <m-o> :<C-u>:MyFiles<CR>
 nnoremap <m-i> :<c-u>Find<cr>
 nnoremap <m-j> :<C-u>:History:<CR>
 nnoremap <m-l> :<C-u>:Lines<CR>
 nnoremap <m-b> :<c-u>Buffers<cr>
 
-
 " This command behaves the same as the one I use on the commandline for
 " opening files.
 command! -nargs=? MyFiles call fzf#run(fzf#wrap({
 			\ 'source': 'fd --hidden --type f --exclude .git',
-			\ 'options': '--multi --extended --no-sort',
+			\ 'options': '--multi --extended',
 			\ 'down':    '40%',
 			\ 'dir': <q-args>}))
 
@@ -999,7 +996,7 @@ endfunction
 command! Prs call fzf#run(fzf#wrap({
 			\ 'source': 'ghapi prs --repo celo-org/celo-blockchain --fields "title:%v ,url:[%v]"',
 			\ 'sink':    function('s:insert_line'), 
-			\ 'options': '--multi --extended --no-sort',
+			\ 'options': '--multi --extended',
 			\ 'down':    '40%'}))
 
 function! s:insert_line(item)
