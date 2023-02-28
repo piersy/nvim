@@ -752,7 +752,7 @@ augroup coc_vim_setup
 	autocmd filetype sh,vim,go,c,cpp,javascript,typescript,python,rust,yaml call ApplyCocVimSetup()
 	" autocmd filetype vim,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
 	" Organize imports on save
-	autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+	autocmd BufWritePre *.go silent! :call CocAction('runCommand', 'editor.action.organizeImport')
 	" format on save
 	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js,*.rs,*.yml,*.yaml :call CocAction('format')
 	" Update signature help on jump placeholder, this makes the function
