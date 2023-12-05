@@ -298,6 +298,13 @@ vnoremap M :Man <C-R><C-W> <CR>
 cnoremap <C-j> <Down>
 cnoremap <C-k> <Up>
 
+" This allows multiple pastings of the same thing when yanking a visual
+" section and pasting over another visually selected section. It works by
+" mapping to paste and then gv selects the last selected text which is the
+" last block you selected which has just been replaced by the pasted thing
+" and then yanking again.
+xnoremap p pgvy
+
 " Space key does nothing in insert, it is also easily reachable from both
 " hands.
 let mapleader = "\<Space>"
@@ -502,12 +509,19 @@ nnoremap \ @:
 " I had to use crtl+v in insert mode to find the keycode for ctrl+backspace.
 inoremap  <C-W>
 
-" Map ctrl+f to filter lines in the file based on the selected text, by
+" Map ctrl+f to filter lines in the file to those containing the selected
+" text, by default ctrl+f is mapped to page down which I do not use. This
+" command works by yanking the text and then pasting it into the command line
+" using <c-r>r to paste from register r (a register that I will probably never
+" use in my normal day to day vim use).
+vnoremap <c-f> "ry:v/<c-r>r/d<cr>
+" Map ctrl+g to delete lines in the file containing selected text, by
 " default ctrl+f is mapped to page down which I do not use.
 " This command works by yanking the text and then pasting it into the command
 " line using <c-r>r to paste from register r (a register that I will probably
 " never use in my normal day to day vim use).
-vnoremap <c-f> "ry:v/<c-r>r/d<cr>
+vnoremap <c-g> "ry:g/<c-r>r/d<cr>
+
 
 
 " help buffer key mappings {{{
@@ -716,12 +730,26 @@ set signcolumn=yes
 " color scheme and it doesn't work for molokai
 hi! link CocMenuSel PmenuSel
 
-let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rust-analyzer', 'coc-pairs', 'coc-git', 'coc-json']
+let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rust-analyzer', 'coc-pairs', 'coc-git', 'coc-json', 'coc-solidity', 'coc-marketplace']
 
 let g:coc_snippet_next='<tab>'
 let g:coc_snippet_prev='<s-tab>'
 
 let g:coc_enable_locationlist = 0
+
+
+" Coc is always active so I move these out of the apply function so I can use
+" coc completions in normal files
+
+" This is the new way to insert completions in coc Jan 2023... Should i
+" use coc#_select_confirm() instead of pum#confirm?
+inoremap <silent> <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<cr>"
+
+
+" With cocs new menu we need a different command to navigate it
+inoremap <silent> <expr> <C-j> coc#pum#visible() ? coc#pum#next(1) : "\<c-j>"
+inoremap <silent> <expr> <C-k> coc#pum#visible() ? coc#pum#prev(1) : "\<c-k>"
+
 
 " Toggles the first letter of word to be capital or lowercase.
 function! ToggleCapital(word)
@@ -749,12 +777,12 @@ augroup coc_vim_setup
 	autocmd!
 	" Setup languages for which coc vim is enabled, also some require language
 	" server support in in coc-settings.json (:CocConfig).
-	autocmd filetype sh,vim,go,c,cpp,javascript,typescript,python,rust,yaml call ApplyCocVimSetup()
+	autocmd filetype sh,vim,go,c,cpp,javascript,typescript,python,rust,yaml,solidity call ApplyCocVimSetup()
 	" autocmd filetype vim,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
 	" Organize imports on save
-	autocmd BufWritePre *.go silent! :call CocAction('runCommand', 'editor.action.organizeImport')
+	" autocmd BufWritePre *.go silent! :call CocAction('runCommand', 'editor.action.organizeImport')
 	" format on save
-	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js,*.rs,*.yml,*.yaml :call CocAction('format')
+	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js,*.rs,*.yml,*.yaml silent! :call CocAction('format')
 	" Update signature help on jump placeholder, this makes the function
 	" param help be displayed as you jump between function params when
 	" completing.
@@ -788,10 +816,7 @@ function! ApplyCocVimSetup()
 	" h for hierarchy 
 	" Toggle from public to private
 	nnoremap <buffer> <expr> <leader>m ':call CocAction("rename", "' . ToggleCapital(expand("<cword>")) . '")<cr>'
-	" This searches for a string and finds all occurrences and lets us edit
-	" them with multiple cursors, can be useful for simple refactors, the
-	" trailing space is intended.
-	nnoremap <silent> <buffer> <leader>R :CocSearch 
+	vmap <silent> <buffer> <leader>R <Plug>(coc-codeaction-refactor-selected)
 
 	"Opens the renameable element under the cursor in a separate window with
 	"multiple cursors so that it can be renamed whilst watching all the
@@ -838,15 +863,6 @@ function! ApplyCocVimSetup()
 	" disabled in favour of call hierarchy
 	" nnoremap <silent> <buffer> <leader>h :call CocAction('doHover')<CR>
 	nnoremap <silent> <buffer> <leader>l :call CocAction('doHover')<cr>
-
-	" This is the new way to insert completions in coc Jan 2023... Should i
-	" use coc#_select_confirm() instead of pum#confirm?
-	inoremap <silent> <buffer> <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<cr>"
-
-
-	" With cocs new menu we need a different command to navigate it
-	inoremap <silent> <buffer> <expr> <C-j> coc#pum#visible() ? coc#pum#next(1) : "\<c-j>"
-	inoremap <silent> <buffer> <expr> <C-k> coc#pum#visible() ? coc#pum#prev(1) : "\<c-k>"
 
 	" So in order to compose the filetype and the CursorHold events we need to
 	" use an augroup in an augroup so that we can reliably clear previous
@@ -982,11 +998,11 @@ command! -bang -nargs=* Find
 			\   <bang>0)
 
 " Jump to buffers
-command! Buffers call fzf#run({
-\ 'source':  reverse(s:all_files()),
+command! Buffers call fzf#run(fzf#wrap({
+\ 'source':  s:all_files(),
 \ 'sink':    'edit',
-\ 'options': '-m -x +s',
-\ 'down':    '40%' })
+\ 'options': '--multi --extended',
+\ 'down':    '40%' }))
 
 function! s:all_files()
   return map(filter(range(1, bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)')
