@@ -730,7 +730,7 @@ set signcolumn=yes
 " color scheme and it doesn't work for molokai
 hi! link CocMenuSel PmenuSel
 
-let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rust-analyzer', 'coc-pairs', 'coc-git', 'coc-json', 'coc-solidity', 'coc-marketplace']
+let g:coc_global_extensions = ['coc-vimlsp','coc-snippets','coc-eslint','coc-tsserver','coc-pyright','coc-go','coc-rust-analyzer', 'coc-pairs', 'coc-git', 'coc-json', 'coc-solidity', 'coc-marketplace', 'coc-yaml']
 
 let g:coc_snippet_next='<tab>'
 let g:coc_snippet_prev='<s-tab>'
@@ -777,12 +777,17 @@ augroup coc_vim_setup
 	autocmd!
 	" Setup languages for which coc vim is enabled, also some require language
 	" server support in in coc-settings.json (:CocConfig).
-	autocmd filetype sh,vim,go,c,cpp,javascript,typescript,python,rust,yaml,solidity call ApplyCocVimSetup()
+	autocmd filetype sh,vim,go,gomod,c,cpp,javascript,typescript,python,rust,yaml,solidity call ApplyCocVimSetup()
 	" autocmd filetype vim,c,cpp,javascript,typescript,python call ApplyCocVimSetup()
 	" Organize imports on save
-	" autocmd BufWritePre *.go silent! :call CocAction('runCommand', 'editor.action.organizeImport')
-	" format on save
-	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js,*.rs,*.yml,*.yaml silent! :call CocAction('format')
+	autocmd BufWritePre *.go silent! :call CocAction('runCommand', 'editor.action.organizeImport')
+	" format on save (For some reason adding yml and yaml here breaks
+	" something such that on save i get an error about reading commondir from
+	" fugitive, but in any case coc-yaml does not have a provider for format,
+	" so we are not losing anything by removing them here, instead could write
+	" a function that applies to all filetypes and checks if there is a
+	" provider before calling format.)
+	autocmd BufWritePre *.go,*.py,*.c,*.cpp,*.h,*.hpp,*.ts,*.js,*.rs,*.yaml silent! :call CocAction('format')
 	" Update signature help on jump placeholder, this makes the function
 	" param help be displayed as you jump between function params when
 	" completing.
