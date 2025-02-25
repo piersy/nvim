@@ -618,6 +618,14 @@ function! s:CloseOtherBuffers()
  	call setpos('.', pos)
 endfunction
 
+" Got this tip here - https://vimtricks.com/p/vim-calculator/
+" But it got way more involved, basically I yank into register x, move to end
+" of selection (`>`) eval contents of x into x enter append add the equals and
+" paste x.
+vnoremap <C-\> "xy`>:let @x=eval(getreg('x'))<CR>a = <esc>"xp
+
+inoremap <C-\> <esc>"xyy:let @x=eval(trim(getreg('x')))<CR>A = <esc>"xp
+
 "}}}
 
 " yaml file type config {{{
